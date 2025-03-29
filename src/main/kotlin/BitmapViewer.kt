@@ -74,4 +74,12 @@ class BitmapViewer(private val bitmapStorage: BasicBitmapStorage, title: String 
             frame.dispose()
         }
     }
+
+    /**
+     * Checks if the viewer window is visible.
+     * @return true if the window is visible, false otherwise.
+     */
+    fun isVisible(): Boolean {
+        return frame.isVisible
+    }
 }

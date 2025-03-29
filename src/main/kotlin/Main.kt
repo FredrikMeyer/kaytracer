@@ -1,7 +1,6 @@
 package net.fredrikmeyer
 
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.*
 
 fun main() {
     println("Hello World!")
@@ -9,9 +8,36 @@ fun main() {
     val sphere = Sphere(Point3D(0f, 0f, 0f), 1f)
 
     // Create a bitmap with a simple pattern
-    val width = 320
-    val height = 320
+    val width = 600
+    val height = 600
     val bbs = BasicBitmapStorage(width, height)
+
+    // Display the bitmap using our new BitmapViewer class
+    val viewer = BitmapViewer(bbs, "Sample Image")
+    viewer.show()
+
+    var angle = 0.0
+    while (true) {
+        val lightPos = Point3D(cos(angle).toFloat(), sin(angle).toFloat(), 2f)
+        doRayTracing(bbs, width, height, sphere, lightPos)
+        viewer.refresh()
+        Thread.sleep(100)
+        angle += 0.11
+    }
+
+
+    // Keep the program running until the window is closed
+    println("Close the viewer window to exit the program")
+    Thread.sleep(Long.MAX_VALUE)
+}
+
+private fun doRayTracing(
+    bbs: BasicBitmapStorage,
+    width: Int,
+    height: Int,
+    sphere: Sphere,
+    lightPos: Point3D
+) {
     with(bbs) {
         fill(Color(1f, 1f, 1f).toJavaAwt())
 
@@ -39,16 +65,19 @@ fun main() {
                     direction = (-d * Vector3D(-1f, 0f, 0f) + (u * uu + v * vv)).normalize()
                 )
 
-                val lightPos = Point3D(2f, 2f, 2f)
-
-                val intersectRaySphere = intersectRaySphere(ray, sphere)?.let {
+                intersectRaySphere(ray, sphere)?.let {
                     val p = ray.pointOnRay(it)
                     val normal = sphere.normalAtPoint(p)
                     val lightDir = (p.toVector3D() - lightPos.toVector3D()).normalize()
 
                     val I = 2f
                     val kd = 1.5f
-                    val L = kd * I * max(0f, normal dot lightDir)
+                    val lambertian = kd * max(0f, normal dot lightDir)
+
+                    val h = (ray.direction + lightDir).normalize()
+                    val ks = 1.0f
+                    val phong = ks * max(0f, normal dot h).pow(100.0f)
+                    val L = I * (lambertian + phong)
                     val c = Color(min(L, 1f), 0f, 0f)
                     setPixel(x, y, c.toJavaAwt())
                 }
@@ -56,14 +85,6 @@ fun main() {
             }
         }
     }
-
-    // Display the bitmap using our new BitmapViewer class
-    val viewer = BitmapViewer(bbs, "Sample Image")
-    viewer.show()
-
-    // Keep the program running until the window is closed
-    println("Close the viewer window to exit the program")
-    Thread.sleep(Long.MAX_VALUE)
 }
 
 fun pixelToUV(
