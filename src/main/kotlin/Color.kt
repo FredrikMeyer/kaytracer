@@ -1,14 +1,28 @@
 package net.fredrikmeyer
 
-import java.awt.Color
+import kotlin.math.max
+import kotlin.math.min
+import java.awt.Color as AwtColor
 
 data class Color(val r: Float, val g: Float, val b: Float) {
     init {
-        require(r in 0.0..1.0) { "r must be between 0.0 and 1.0. Actual value: $r"}
-        require(g in 0.0..1.0) { "g must be between 0.0 and 1.0. Actual value: $g"}
-        require(b in 0.0..1.0) { "b must be between 0.0 and 1.0. Actual value: $b"}
+        require(r in 0.0..1.0) { "r must be between 0.0 and 1.0. Actual value: $r" }
+        require(g in 0.0..1.0) { "g must be between 0.0 and 1.0. Actual value: $g" }
+        require(b in 0.0..1.0) { "b must be between 0.0 and 1.0. Actual value: $b" }
     }
-    fun toJavaAwt(): Color {
-        return Color(r, g, b)
+
+    fun toJavaAwt(): AwtColor {
+        return AwtColor(r, g, b)
+    }
+
+    companion object {
+        val WHITE = Color(1.0f, 1.0f, 1.0f)
+        val RED = Color(1.0f, 0.0f, 0.0f)
     }
 }
+
+infix operator fun Float.times(other: Color) =
+    Color(min(this * other.r, 1.0f), min(this * other.g, 1.0f), min(this * other.b, 1.0f))
+
+infix operator fun Color.plus(other: Color) =
+    Color(min(this.r + other.r, 1.0f), min(this.g + other.g, 1.0f), min(this.b + other.b, 1.0f))

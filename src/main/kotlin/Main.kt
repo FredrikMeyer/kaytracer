@@ -1,6 +1,9 @@
 package net.fredrikmeyer
 
-import kotlin.math.*
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.sin
 
 fun main() {
     println("Hello World!")
@@ -16,19 +19,35 @@ fun main() {
     val viewer = BitmapViewer(bbs, "Sample Image")
     viewer.show()
 
-    var angle = 0.0
-    while (true) {
-        val lightPos = Point3D(cos(angle).toFloat(), sin(angle).toFloat(), 2f)
-        doRayTracing(bbs, width, height, sphere, lightPos)
-        viewer.refresh()
-        Thread.sleep(100)
-        angle += 0.11
+    // Poll until the frame becomes visible
+    while (!viewer.isVisible()) {
+        // Short sleep to avoid busy-waiting
+        Thread.sleep(10)
     }
 
+    var angle = 0.0
+    var lastFrameTime = System.currentTimeMillis()
+    val targetFrameTime = 40 // 100ms between frames (10 FPS)
 
-    // Keep the program running until the window is closed
-    println("Close the viewer window to exit the program")
-    Thread.sleep(Long.MAX_VALUE)
+    while (viewer.isVisible()) {
+        val currentTime = System.currentTimeMillis()
+        val elapsedTime = currentTime - lastFrameTime
+
+        if (elapsedTime >= targetFrameTime) {
+            val lightPos = Point3D(cos(angle).toFloat(), sin(angle).toFloat(), 2f)
+            doRayTracing(bbs, width, height, sphere, lightPos)
+            viewer.refresh()
+            lastFrameTime = currentTime
+            angle += 0.11
+        } else {
+            // Short sleep to avoid busy-waiting
+            Thread.sleep(1)
+        }
+    }
+
+    // The loop has exited, which means the window was closed
+    println("Window closed, exiting program")
+    viewer.close()
 }
 
 private fun doRayTracing(
@@ -57,12 +76,14 @@ private fun doRayTracing(
 
                 val uu = Vector3D(0f, 1f, 0f)
                 val vv = Vector3D(0f, 0f, 1f)
+                val w = Vector3D(-1f, 0f, 0f)
+
+                val e = Vector3D(3f, 0f, 0f)
 
                 val d = 1f // distance to image plane
-                val e = Vector3D(3f, 0f, 0f)
                 val ray = Ray(
                     origin = e.toPoint3D(),
-                    direction = (-d * Vector3D(-1f, 0f, 0f) + (u * uu + v * vv)).normalize()
+                    direction = (-d * w + (u * uu + v * vv)).normalize()
                 )
 
                 intersectRaySphere(ray, sphere)?.let {
@@ -70,15 +91,22 @@ private fun doRayTracing(
                     val normal = sphere.normalAtPoint(p)
                     val lightDir = (p.toVector3D() - lightPos.toVector3D()).normalize()
 
-                    val I = 2f
-                    val kd = 1.5f
-                    val lambertian = kd * max(0f, normal dot lightDir)
+                    val I = 1.0f
+                    val kd = Color.RED
+                    val lambertian = max(0f, normal dot lightDir) * kd
 
-                    val h = (ray.direction + lightDir).normalize()
-                    val ks = 1.0f
-                    val phong = ks * max(0f, normal dot h).pow(100.0f)
-                    val L = I * (lambertian + phong)
-                    val c = Color(min(L, 1f), 0f, 0f)
+                    val vv = -1f * ray.direction
+                    val h = (vv + lightDir).normalize()
+                    val ks = Color.WHITE
+                    val phong = max(0.0, (normal dot h).toDouble()).pow(10.0).toFloat() * ks
+
+                    // Ambient light
+                    val ka = Color.RED
+                    val Iambient = 0.4f
+                    val ambientIntensity = Iambient * ka;
+
+                    val L = I * (lambertian + phong) + ambientIntensity
+                    val c = L
                     setPixel(x, y, c.toJavaAwt())
                 }
 

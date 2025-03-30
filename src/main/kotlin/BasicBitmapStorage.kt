@@ -13,9 +13,9 @@ class BasicBitmapStorage(width: Int, private val height: Int) {
     }
 
     fun setPixel(x: Int, y: Int, c: Color) {
-        require(x <= image.width && y <= image.height)
+        require(x < image.width && y < image.height)
         require(x >= 0 && y >= 0)
-        image.setRGB(x, height - y, c.getRGB())
+        image.setRGB(x, height - 1 - y, c.rgb)
     }
 
     fun getPixel(x: Int, y: Int) = Color(image.getRGB(x, y))
