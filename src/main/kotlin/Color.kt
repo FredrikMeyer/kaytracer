@@ -1,6 +1,5 @@
 package net.fredrikmeyer
 
-import kotlin.math.max
 import kotlin.math.min
 import java.awt.Color as AwtColor
 

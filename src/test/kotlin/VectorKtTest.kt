@@ -1,5 +1,5 @@
-import net.fredrikmeyer.Vector3D
-import net.fredrikmeyer.dot
+import net.fredrikmeyer.geometry.Vector3D
+import net.fredrikmeyer.geometry.dot
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

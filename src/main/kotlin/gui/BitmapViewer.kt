@@ -1,5 +1,6 @@
-package net.fredrikmeyer
+package net.fredrikmeyer.gui
 
+import net.fredrikmeyer.BasicBitmapStorage
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.event.KeyAdapter

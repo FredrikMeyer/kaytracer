@@ -1,4 +1,7 @@
 import net.fredrikmeyer.*
+import net.fredrikmeyer.geometry.Point3D
+import net.fredrikmeyer.geometry.Sphere
+import net.fredrikmeyer.geometry.Vector3D
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -18,13 +21,11 @@ class RayKtTest {
         val ray = Ray(origin = Point3D(0f, 0f, 2f), direction = Vector3D(0f, 0f, -1f))
         val sphere = Sphere(center = Point3D(0f, 0f, 0f), radius = 1f)
 
-        val res = intersectRaySphere(ray, sphere)
+        val res = sphere.intersect(ray)
 
         assertThat(res).isNotNull()
-        assertThat(res).isEqualTo(1f)
 
-        val point = ray.pointOnRay(res!!)
-        assertThat(point).isEqualTo(
+        assertThat(res).isEqualTo(
             Point3D(0f, 0f, 1f)
         )
     }

@@ -1,4 +1,6 @@
-package net.fredrikmeyer
+package net.fredrikmeyer.geometry
+
+import kotlin.math.sqrt
 
 data class Vector3D(val x: Float, val y: Float, val z: Float) {
     fun normalize(): Vector3D {
@@ -27,4 +29,4 @@ infix fun Vector3D.dot(other: Vector3D) =
 infix operator fun Float.times(other: Vector3D) =
     Vector3D(this * other.x, this * other.y, this * other.z)
 
-fun Vector3D.norm() = this.dot(this)
+fun Vector3D.norm() = sqrt(this.dot(this))
