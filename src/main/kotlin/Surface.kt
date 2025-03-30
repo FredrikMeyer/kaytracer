@@ -16,16 +16,13 @@ interface Surface {
     ): Point3D?
 }
 
-object SphericalSurface : Surface {
-    override val geometry: GeometricObject = Sphere(
-        center = Point3D(0f, 0f, 0f),
-        radius = 1.0f
-    )
+class SphericalSurface(override val geometry: Sphere) : Surface {
+
     override val material: Material = Material(
         color = Color.RED
     )
 
     override fun hit(ray: Ray, interval: Interval): Point3D? {
-        return geometry.intersect(ray)
+        return ray.pointOnRay(geometry.intersect(ray)!!)
     }
 }
