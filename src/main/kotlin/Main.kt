@@ -10,10 +10,22 @@ import kotlin.math.sin
 fun main() {
     println("Hello World!")
 
-    val sphere = Sphere(Point3D(0f, 0f, 0f), 1f)
-    val plane = Plane(Point3D(0f, -1f, 0f), Vector3D(0f, -1f, 0f))
+    val sphere1 =
+        SphericalSurface(Sphere(Point3D(0.5f, 0f, 0f), 1f), material = Material(color = Color.RED))
+    val sphere2 = SphericalSurface(
+        Sphere(Point3D(-1f, -0.5f, 0f), 0.5f),
+        material = Material(color = Color.BLUE)
+    )
+    val plane = PlanarSurface(
+        Plane(point = Point3D(0f, -1f, 0f), normal = Vector3D(0f, 1f, 0f)),
+        material = Material(color = Color.GREEN)
+    )
+    val sky =  PlanarSurface(
+        Plane(point = Point3D(0f, 10f, 0f), normal = Vector3D(0f, -1f, 0f)),
+        material = Material(color = Color.BLACK)
+    )
 
-    val scene = Scene(listOf(sphere, plane))
+    val scene = Scene(listOf(sphere1, sphere2, plane))
 
     // Create a bitmap with a simple pattern
     val width = 600
@@ -39,7 +51,7 @@ fun main() {
         val elapsedTime = currentTime - lastFrameTime
 
         if (elapsedTime >= targetFrameTime) {
-            val lightPos = Point3D(1.5f * cos(angle).toFloat(), 0f, 1.5f * sin(angle).toFloat())
+            val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
             doRayTracing(bbs, width, height, scene, lightPos)
             viewer.refresh()
             lastFrameTime = currentTime
@@ -62,8 +74,6 @@ private fun doRayTracing(
     scene: Scene,
     lightPos: Point3D
 ) {
-    bbs.fill(Color(1f, 1f, 1f).toJavaAwt())
-
     // Draw a red rectangle
     for (x in 0..<width) {
         for (y in 0..<height) {
@@ -117,36 +127,34 @@ fun colorOfPixel(
     )
 
     return scene.hit(ray)?.let {
-        computeColorOfIntersection(it, lightPos, ray)
+        val point = it.point
+        val normal = it.normal
+        val lightDir = (lightPos.toVector3D() - point.toVector3D()).normalize()
+
+        // Ambient light
+        val ka = it.surface.material.color
+        val Iambient = 0.4f
+        val ambientIntensity = Iambient * ka;
+
+        val rayFromHit = Ray(point, lightDir)
+        val res = scene.hit(rayFromHit, Interval(0.00001f, Float.POSITIVE_INFINITY))
+
+        val shadowContribution = if (res == null) {
+            val I = 1.0f
+            val kd = it.surface.material.color
+            val lambertian = max(0f, normal dot lightDir) * kd
+
+            val vv = -1f * ray.direction
+            val h = (vv + lightDir).normalize()
+            val ks = Color.WHITE
+            val phong = max(0.0, (normal dot h).toDouble()).pow(50.0).toFloat() * ks
+
+            I * (lambertian + phong)
+        } else {
+            Color.BLACK
+        }
+        return ambientIntensity + shadowContribution
     } ?: Color.WHITE
-}
-
-private fun computeColorOfIntersection(
-    hit: Hit,
-    lightPos: Point3D,
-    ray: Ray
-): Color {
-    val point = hit.point
-    val normal = hit.normal
-    val lightDir = (point.toVector3D() - lightPos.toVector3D()).normalize()
-
-    val I = 1.0f
-    val kd = Color.RED
-    val lambertian = max(0f, normal dot lightDir) * kd
-
-    val vv = -1f * ray.direction
-    val h = (vv + lightDir).normalize()
-    val ks = Color.WHITE
-    val phong = max(0.0, (normal dot h).toDouble()).pow(10.0).toFloat() * ks
-
-    // Ambient light
-    val ka = Color.RED
-    val Iambient = 0.4f
-    val ambientIntensity = Iambient * ka;
-
-    val L = I * (lambertian + phong) + ambientIntensity
-    val c = L
-    return c
 }
 
 

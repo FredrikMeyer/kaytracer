@@ -2,34 +2,38 @@ package net.fredrikmeyer.geometry
 
 import net.fredrikmeyer.Interval
 import net.fredrikmeyer.Ray
+import net.fredrikmeyer.Surface
 
 data class Hit(
     val distance: Float,
     val normal: Vector3D,
     val point: Point3D,
-    val geometricObject: GeometricObject
+    val surface: Surface
 )
 
-class Scene(private val objects: List<GeometricObject>) {
+class Scene(private val objects: List<Surface>) {
     fun hit(
         ray: Ray,
         interval: Interval = Interval(0f, Float.POSITIVE_INFINITY)
     ): Hit? {
         val closestObject =
             objects
-                .mapNotNull { obj -> obj.intersect(ray, interval)?.let { Pair(obj, it) } }
+                .mapNotNull { obj -> obj.geometry.intersect(ray, interval)?.let { Pair(obj, it) } }
                 .minByOrNull { it.second }
 
         if (closestObject == null) {
             return null
         }
 
-        val distance = closestObject.second
+        val (obj, distance) = closestObject
+
+        val point = ray.pointOnRay(distance)
+
         return Hit(
             distance,
-            closestObject.first.normalAtPoint(ray.pointOnRay(distance)),
-            ray.pointOnRay(distance),
-            closestObject.first
+            obj.geometry.normalAtPoint(point),
+            point,
+            obj
         )
     }
 }

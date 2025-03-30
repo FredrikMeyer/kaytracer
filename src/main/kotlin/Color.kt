@@ -17,6 +17,9 @@ data class Color(val r: Float, val g: Float, val b: Float) {
     companion object {
         val WHITE = Color(1.0f, 1.0f, 1.0f)
         val RED = Color(1.0f, 0.0f, 0.0f)
+        val BLUE = Color(0.0f, 0.0f, 1.0f)
+        val GREEN = Color(0.0f, 1.0f, 0.0f)
+        val BLACK = Color(0.0f, 0.0f, 0.0f)
     }
 }
 
