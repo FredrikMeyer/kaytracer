@@ -7,6 +7,9 @@ import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sin
 
+// Variable to store the current camera Z position
+var currentCameraZ = 3.0f
+
 fun main() {
     println("Hello World!")
 
@@ -32,8 +35,21 @@ fun main() {
     val height = 600
     val bbs = BasicBitmapStorage(width, height)
 
-    // Display the bitmap using our new BitmapViewer class
-    val viewer = BitmapViewer(bbs, "Sample Image")
+    // Display the bitmap using our new BitmapViewer class with camera position slider
+    val viewer = BitmapViewer(
+        bitmapStorage = bbs,
+        title = "Ray Tracer - Adjust Camera Position",
+        initialCameraZ = currentCameraZ,
+        minCameraZ = 1.0f,
+        maxCameraZ = 10.0f
+    )
+
+    // Set up the camera position change listener
+    viewer.setCameraPositionChangeListener { newCameraZ ->
+        currentCameraZ = newCameraZ
+        viewer.refresh()
+    }
+
     viewer.show()
 
     // Poll until the frame becomes visible
@@ -146,7 +162,7 @@ private fun rayAtPoint(u: Float, v: Float): Ray {
     val vv = Vector3D(0f, 1f, 0f)
     val w = Vector3D(0f, 0f, 1f)
 
-    val e = Point3D(0f, 0f, 3f)
+    val e = Point3D(0f, 0f, currentCameraZ)
 
     val d = 1f
     val ray = Ray(
