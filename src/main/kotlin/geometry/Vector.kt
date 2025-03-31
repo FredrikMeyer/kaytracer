@@ -14,6 +14,18 @@ data class Vector3D(val x: Float, val y: Float, val z: Float) {
     fun toPoint3D(): Point3D {
         return Point3D(x, y, z)
     }
+
+    infix fun cross(other: Vector3D): Vector3D {
+        val (a, b, c) = other
+        return Vector3D(c * y - b * z, a * z - c * x, b * x - a * y)
+    }
+
+    companion object {
+        val ZERO = Vector3D(0f, 0f, 0f)
+        val X = Vector3D(1f, 0f, 0f)
+        val Y = Vector3D(0f, 1f, 0f)
+        val Z = Vector3D(0f, 0f, 1f)
+    }
 }
 
 

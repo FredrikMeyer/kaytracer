@@ -22,6 +22,6 @@ class SphereTest {
         val point = sphere.intersect(ray)
 
         assertThat(point).isNotNull()
-        assertThat(point!!.toVector3D().norm()).isEqualTo((sqrt(3.0) - 1).toFloat())
+        assertThat(point).isEqualTo((sqrt(3.0) - 1).toFloat())
     }
 }

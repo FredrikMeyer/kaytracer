@@ -16,16 +16,16 @@ fun main() {
         Sphere(Point3D(-1f, -0.5f, 0f), 0.5f),
         material = Material(color = Color.BLUE)
     )
+    val sphere3 = SphericalSurface(
+        geometry = Sphere(Point3D(-0.5f, -0.8f, 0.5f), 0.2f),
+        material = Material(color = Color.YELLOW)
+    )
     val plane = PlanarSurface(
         Plane(point = Point3D(0f, -1f, 0f), normal = Vector3D(0f, 1f, 0f)),
         material = Material(color = Color.GREEN)
     )
-    val sky =  PlanarSurface(
-        Plane(point = Point3D(0f, 10f, 0f), normal = Vector3D(0f, -1f, 0f)),
-        material = Material(color = Color.BLACK)
-    )
 
-    val scene = Scene(listOf(sphere1, sphere2, plane))
+    val scene = Scene(listOf(sphere1, sphere2, plane, sphere3))
 
     // Create a bitmap with a simple pattern
     val width = 600
@@ -67,6 +67,13 @@ fun main() {
     viewer.close()
 }
 
+data class ImagePlane(
+    val l: Float,
+    val r: Float,
+    val b: Float,
+    val t: Float,
+)
+
 private fun doRayTracing(
     bbs: BasicBitmapStorage,
     width: Int,
@@ -77,17 +84,17 @@ private fun doRayTracing(
     // Draw a red rectangle
     for (x in 0..<width) {
         for (y in 0..<height) {
+            val uvCoordinates = pixelToUV(
+                x,
+                y,
+                ImagePlane(-0.5f, 0.5f, -0.5f, 0.5f),
+                width,
+                height
+            )
             val color = colorOfPixel(
-                x = x,
-                y = y,
-                width = width,
-                height = height,
-                l = -0.5f,
-                r = 0.5f,
-                b = -0.5f,
-                t = 0.5f,
                 scene = scene,
-                lightPos = lightPos
+                lightPos = lightPos,
+                uvCoordinates = uvCoordinates
             )
             bbs.setPixel(x, y, color.toJavaAwt())
         }
@@ -95,36 +102,13 @@ private fun doRayTracing(
 }
 
 fun colorOfPixel(
-    x: Int,
-    y: Int,
-    width: Int,
-    height: Int,
-    l: Float,
-    r: Float,
-    b: Float,
-    t: Float,
     scene: Scene,
     lightPos: Point3D,
+    uvCoordinates: Pair<Float, Float>,
 ): Color {
-    val (u, v) = pixelToUV(
-        x,
-        y,
-        l, r, b, t,
-        width,
-        height
-    )
+    val (u, v) = uvCoordinates
 
-    val uu = Vector3D(1f, 0f, 0f)
-    val vv = Vector3D(0f, 1f, 0f)
-    val w = Vector3D(0f, 0f, 1f)
-
-    val e = Point3D(0f, 0f, 3f)
-
-    val d = 1f
-    val ray = Ray(
-        origin = e,
-        direction = (-d * w + (u * uu + v * vv)).normalize()
-    )
+    val ray = rayAtPoint(u, v)
 
     return scene.hit(ray)?.let {
         val point = it.point
@@ -157,17 +141,30 @@ fun colorOfPixel(
     } ?: Color.WHITE
 }
 
+private fun rayAtPoint(u: Float, v: Float): Ray {
+    val uu = Vector3D(1f, 0f, 0f)
+    val vv = Vector3D(0f, 1f, 0f)
+    val w = Vector3D(0f, 0f, 1f)
+
+    val e = Point3D(0f, 0f, 3f)
+
+    val d = 1f
+    val ray = Ray(
+        origin = e,
+        direction = (-d * w + (u * uu + v * vv)).normalize()
+    )
+    return ray
+}
+
 
 fun pixelToUV(
     i: Int,
     j: Int,
-    l: Float,
-    r: Float,
-    b: Float,
-    t: Float,
+    imagePlane: ImagePlane,
     pixelWidth: Int,
     pixelHEight: Int
 ): Pair<Float, Float> {
+    val (l, r, b, t) = imagePlane
     val width = r - l
     val height = t - b
     val u = l + width * (i + 0.5f) / pixelWidth;
