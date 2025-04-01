@@ -31,7 +31,13 @@ fun main() {
         material = Material(color = Color.GREEN)
     )
 
-    val scene = Scene(listOf(sphere1, sphere2, plane, sphere3, union))
+    val scene = scene {
+        +sphere1
+        +sphere2
+        +sphere3
+        +plane
+    }
+    println(scene.numberOfSurfaces())
 
     // Create a bitmap with a simple pattern
     val width = 600
