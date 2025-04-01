@@ -6,7 +6,6 @@ import net.fredrikmeyer.Surface
 
 data class Hit(
     val distance: Float,
-    val normal: Vector3D,
     val point: Point3D,
     val surface: Surface
 )
@@ -31,7 +30,6 @@ class Scene(private val objects: List<Surface>) {
 
         return Hit(
             distance,
-            obj.geometry.normalAtPoint(point),
             point,
             obj
         )

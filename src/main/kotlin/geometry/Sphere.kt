@@ -3,6 +3,7 @@ package net.fredrikmeyer.geometry
 import net.fredrikmeyer.Interval
 import net.fredrikmeyer.Ray
 import net.fredrikmeyer.squared
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 interface GeometricObject {
@@ -36,6 +37,10 @@ data class Sphere(val center: Point3D, val radius: Float) : GeometricObject {
         }
 
         return (-(direction dot dirToSphere) - sqrt(discriminant)) / (direction dot direction)
+    }
+
+    fun isOnSphere(point: Point3D): Boolean {
+        return abs((point.toVector3D() - center.toVector3D()).norm() - radius) < 0.0001
     }
 }
 

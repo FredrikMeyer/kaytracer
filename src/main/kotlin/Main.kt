@@ -25,12 +25,13 @@ fun main() {
         geometry = Sphere(Point3D(-0.5f, -0.8f, 0.5f), 0.2f),
         material = Material(color = Color.YELLOW)
     )
+    val union = UnionOfSpheres(Sphere(Point3D(0.0f, 0f, 0f), 1f), Sphere(Point3D(0.5f, 0f, 0f), 1f))
     val plane = PlanarSurface(
-        Plane(point = Point3D(0f, -1f, 0f), normal = Vector3D(0f, 1f, 0f)),
+        Plane(point = Point3D(0.0f, -1f, 0f), normal = Vector3D(0f, 1f, 0.1f)),
         material = Material(color = Color.GREEN)
     )
 
-    val scene = Scene(listOf(sphere1, sphere2, plane, sphere3))
+    val scene = Scene(listOf(sphere1, sphere2, plane, sphere3, union))
 
     // Create a bitmap with a simple pattern
     val width = 600
@@ -133,7 +134,7 @@ fun colorOfPixel(
 
     return scene.hit(ray, interval = interval)?.let {
         val point = it.point
-        val normal = it.normal
+        val normal = it.surface.geometry.normalAtPoint(point)
         val lightDir = (lightPos.toVector3D() - point.toVector3D()).normalize()
 
         // Ambient light
@@ -158,8 +159,8 @@ fun colorOfPixel(
         } else {
             Color.BLACK
         }
-        val r = ray.direction - 2f * (ray.direction dot normal) * normal
-        val newRay = Ray(point, r)
+        val reflectionVector = ray.direction - 2f * (ray.direction dot normal) * normal
+        val newRay = Ray(point, reflectionVector)
         val km = Color(0.1f, 0.1f, 0.1f)
         return ambientIntensity + shadowContribution + km * colorOfPixel(
             scene,
