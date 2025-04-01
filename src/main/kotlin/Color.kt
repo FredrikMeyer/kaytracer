@@ -29,3 +29,6 @@ infix operator fun Float.times(other: Color) =
 
 infix operator fun Color.plus(other: Color) =
     Color(min(this.r + other.r, 1.0f), min(this.g + other.g, 1.0f), min(this.b + other.b, 1.0f))
+
+infix operator fun Color.times(other: Color) =
+    Color(this.r * other.r, this.g * other.g, this.b * other.b)

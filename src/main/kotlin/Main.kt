@@ -10,6 +10,8 @@ import kotlin.math.sin
 // Variable to store the current camera Z position
 var currentCameraZ = 3.0f
 
+const val MAX_RECURSION_DEPTH = 5
+
 fun main() {
     println("Hello World!")
 
@@ -74,7 +76,7 @@ fun main() {
             angle += 0.05
         } else {
             // Short sleep to avoid busy-waiting
-            Thread.sleep(1)
+            Thread.sleep(10)
         }
     }
 
@@ -107,10 +109,11 @@ private fun doRayTracing(
                 width,
                 height
             )
+            val ray = rayAtPoint(uvCoordinates.first, uvCoordinates.second)
             val color = colorOfPixel(
                 scene = scene,
                 lightPos = lightPos,
-                uvCoordinates = uvCoordinates
+                ray = ray
             )
             bbs.setPixel(x, y, color.toJavaAwt())
         }
@@ -120,13 +123,15 @@ private fun doRayTracing(
 fun colorOfPixel(
     scene: Scene,
     lightPos: Point3D,
-    uvCoordinates: Pair<Float, Float>,
+    ray: Ray,
+    interval: Interval = Interval(0f, Float.POSITIVE_INFINITY),
+    recursionDepth: Int = 0,
 ): Color {
-    val (u, v) = uvCoordinates
+    if (recursionDepth >= MAX_RECURSION_DEPTH) {
+        return Color.BLACK
+    }
 
-    val ray = rayAtPoint(u, v)
-
-    return scene.hit(ray)?.let {
+    return scene.hit(ray, interval = interval)?.let {
         val point = it.point
         val normal = it.normal
         val lightDir = (lightPos.toVector3D() - point.toVector3D()).normalize()
@@ -153,7 +158,16 @@ fun colorOfPixel(
         } else {
             Color.BLACK
         }
-        return ambientIntensity + shadowContribution
+        val r = ray.direction - 2f * (ray.direction dot normal) * normal
+        val newRay = Ray(point, r)
+        val km = Color(0.1f, 0.1f, 0.1f)
+        return ambientIntensity + shadowContribution + km * colorOfPixel(
+            scene,
+            lightPos,
+            newRay,
+            interval = Interval(0.00001f, Float.POSITIVE_INFINITY),
+            recursionDepth + 1
+        )
     } ?: Color.WHITE
 }
 
