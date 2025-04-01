@@ -19,7 +19,7 @@ import javax.swing.event.ChangeListener
  * Uses Swing to create a window that shows the image.
  */
 class BitmapViewer(
-    private val bitmapStorage: BasicBitmapStorage, 
+    private val bitmapStorage: BasicBitmapStorage,
     title: String = "Bitmap Viewer",
     private var initialCameraZ: Float = 3.0f,
     private var minCameraZ: Float = 1.0f,
@@ -44,14 +44,8 @@ class BitmapViewer(
         }
 
         // Create a slider for camera position
-        slider = JSlider(JSlider.HORIZONTAL, 
-            (minCameraZ * 10).toInt(), 
-            (maxCameraZ * 10).toInt(), 
-            (initialCameraZ * 10).toInt())
-        slider.majorTickSpacing = 10
-        slider.minorTickSpacing = 1
-        slider.paintTicks = true
-        slider.paintLabels = true
+        slider = jSlider()
+
 
         valueLabel = JLabel("Camera Z: $initialCameraZ")
 
@@ -83,6 +77,21 @@ class BitmapViewer(
                 }
             }
         })
+    }
+
+    private fun jSlider(): JSlider {
+        val slider = JSlider(
+            JSlider.HORIZONTAL,
+            (minCameraZ * 10).toInt(),
+            (maxCameraZ * 10).toInt(),
+            (initialCameraZ * 10).toInt()
+
+        )
+        slider.majorTickSpacing = 10
+        slider.minorTickSpacing = 1
+        slider.paintTicks = true
+        slider.paintLabels = true
+        return slider
     }
 
     /**

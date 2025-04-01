@@ -12,9 +12,6 @@ interface Surface {
     val material: Material
 }
 
-class SphericalSurface(override val geometry: Sphere, override val material: Material) : Surface {
-}
+class SphericalSurface(override val geometry: Sphere, override val material: Material) : Surface
 
-class PlanarSurface(override val geometry: Plane, override val material: Material) : Surface {
-
-}
+class PlanarSurface(override val geometry: Plane, override val material: Material) : Surface
