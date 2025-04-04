@@ -15,8 +15,6 @@ const val MAX_RECURSION_DEPTH = 5
 fun main() {
     println("Hello World!")
 
-    val sphere1 =
-        SphericalSurface(Sphere(Point3D(0.5f, 0f, 0f), 1f), material = Material(color = Color.RED))
     val sphere2 = SphericalSurface(
         Sphere(Point3D(-1f, -0.5f, 0f), 0.5f),
         material = Material(color = Color.BLUE)
@@ -32,7 +30,22 @@ fun main() {
     )
 
     val scene = scene {
-        +sphere1
+        surface {
+            sphere {
+                radius = 1f
+                center = Point3D(0.5f, 0f, 0f)
+            }
+            material {
+                color = Color.RED
+            }
+        }
+//        +IntersectionOfSpheres(Sphere(
+//            center = Point3D(0.0f, 0f, 0f),
+//            radius = 1f
+//        ), Sphere(
+//            center =  Point3D(-0.5f, 0.5f, 0f),
+//            radius = 1f
+//        ))
         +sphere2
         +sphere3
         +plane
@@ -40,8 +53,8 @@ fun main() {
     println(scene.numberOfSurfaces())
 
     // Create a bitmap with a simple pattern
-    val width = 600
-    val height = 600
+    val width = 900
+    val height = 900
     val bbs = BasicBitmapStorage(width, height)
 
     // Display the bitmap using our new BitmapViewer class with camera position slider
@@ -81,6 +94,7 @@ fun main() {
             viewer.refresh()
             lastFrameTime = currentTime
             angle += 0.05
+            Thread.sleep(10_000)
         } else {
             // Short sleep to avoid busy-waiting
             Thread.sleep(10)
@@ -93,10 +107,10 @@ fun main() {
 }
 
 data class ImagePlane(
-    val l: Float,
-    val r: Float,
-    val b: Float,
-    val t: Float,
+    val left: Float,
+    val right: Float,
+    val bottom: Float,
+    val top: Float,
 )
 
 private fun doRayTracing(
@@ -175,7 +189,7 @@ fun colorOfPixel(
             interval = Interval(0.00001f, Float.POSITIVE_INFINITY),
             recursionDepth + 1
         )
-    } ?: Color.WHITE
+    } ?: Color.BLACK
 }
 
 private fun rayAtPoint(u: Float, v: Float): Ray {

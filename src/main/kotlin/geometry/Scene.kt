@@ -54,7 +54,7 @@ class SceneBuilder {
     fun surface(init: SurfaceBuilder.() -> Unit) {
         val builder = SurfaceBuilder()
         builder.init()
-        surfaces.add(builder.toSurface()!!)
+        surfaces.add(builder.toSurface())
     }
 
     operator fun Surface.unaryPlus() {
@@ -72,10 +72,6 @@ class SurfaceBuilder {
     var geometry: GeometricObject? = null
     var material: Material? = null
 
-    fun sphere(center: Point3D, radius: Float = 1f) {
-        geometry = Sphere(center, radius)
-    }
-
     fun geometry(geometry: GeometricObject, init: SurfaceBuilder.() -> Unit) {
         this.geometry = geometry
         init()
@@ -84,16 +80,33 @@ class SurfaceBuilder {
     fun material(init: MaterialBuilder.() -> Unit): Material {
         val builder = MaterialBuilder()
         builder.init()
+        this.material = builder.build()
         return builder.build()
     }
 
-    fun toSurface(): Surface? {
-        if (geometry == null || material == null) return null
+    fun sphere(init: SphereBuilder.() -> Unit) {
+        val builder = SphereBuilder()
+        builder.init()
+        geometry = builder.build()
+    }
+
+    fun toSurface(): Surface {
+        require(geometry != null && material != null) { "Geometry: $geometry, Material: $material" }
 
         return object : Surface {
             override val geometry: GeometricObject = this@SurfaceBuilder.geometry!!
             override val material: Material = this@SurfaceBuilder.material!!
         }
+    }
+}
+
+@RayTracerDsl
+class SphereBuilder {
+    var center: Point3D = Point3D(0f, 0f, 0f)
+    var radius: Float = 1f
+
+    fun build(): Sphere {
+        return Sphere(center, radius)
     }
 }
 
