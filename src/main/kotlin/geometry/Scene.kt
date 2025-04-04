@@ -8,14 +8,24 @@ data class Hit(
     val surface: Surface
 )
 
-class Scene(private val objects: List<Surface>) {
+class Scene(
+    private val objects: List<Surface>,
+    val ambientLightIntensity: Float = 0.5f,
+    var lightPosition: Point3D = Point3D(0f, 0f, 0f)
+) {
     fun hit(
         ray: Ray,
         interval: Interval = Interval(0f, Float.POSITIVE_INFINITY)
     ): Hit? {
         val closestObject =
             objects
-                .mapNotNull { obj -> obj.geometry.intersect(ray, interval)?.let { Pair(obj, it) } }
+                .mapNotNull { obj ->
+                    obj.geometry.intersect(ray, interval)?.let {
+                        // To avoid far away artifacts
+                        if (it > 100f) return@mapNotNull null
+                        Pair(obj, it)
+                    }
+                }
                 .minByOrNull { it.second }
 
         if (closestObject == null) {
@@ -50,6 +60,7 @@ fun scene(init: SceneBuilder.() -> Unit): Scene {
 @RayTracerDsl
 class SceneBuilder {
     private val surfaces = mutableListOf<Surface>()
+    var ambientLightIntensity: Float = 0.5f
 
     fun surface(init: SurfaceBuilder.() -> Unit) {
         val builder = SurfaceBuilder()
@@ -62,7 +73,7 @@ class SceneBuilder {
     }
 
     fun build(): Scene {
-        return Scene(surfaces)
+        return Scene(surfaces, ambientLightIntensity)
     }
 }
 
@@ -113,8 +124,9 @@ class SphereBuilder {
 @RayTracerDsl
 class MaterialBuilder {
     var color: Color = Color.WHITE
+    var reflectivity: Float = 0.3f
 
     fun build(): Material {
-        return Material(color)
+        return Material(color, reflectivity)
     }
 }

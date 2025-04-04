@@ -40,7 +40,7 @@ data class Sphere(val center: Point3D, val radius: Float) : GeometricObject {
     }
 
     fun isOnSphere(point: Point3D): Boolean {
-        return abs((point.toVector3D() - center.toVector3D()).norm() - radius) < 0.0001
+        return abs((point.toVector3D() - center.toVector3D()).norm() - radius) < 0.000001
     }
 }
 

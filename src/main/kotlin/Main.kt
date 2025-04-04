@@ -2,6 +2,7 @@ package net.fredrikmeyer
 
 import net.fredrikmeyer.geometry.*
 import net.fredrikmeyer.gui.BitmapViewer
+import java.lang.Math.random
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.pow
@@ -10,26 +11,14 @@ import kotlin.math.sin
 // Variable to store the current camera Z position
 var currentCameraZ = 3.0f
 
-const val MAX_RECURSION_DEPTH = 5
+const val MAX_RECURSION_DEPTH = 30
 
 fun main() {
     println("Hello World!")
-
-    val sphere2 = SphericalSurface(
-        Sphere(Point3D(-1f, -0.5f, 0f), 0.5f),
-        material = Material(color = Color.BLUE)
-    )
-    val sphere3 = SphericalSurface(
-        geometry = Sphere(Point3D(-0.5f, -0.8f, 0.5f), 0.2f),
-        material = Material(color = Color.YELLOW)
-    )
     val union = UnionOfSpheres(Sphere(Point3D(0.0f, 0f, 0f), 1f), Sphere(Point3D(0.5f, 0f, 0f), 1f))
-    val plane = PlanarSurface(
-        Plane(point = Point3D(0.0f, -1f, 0f), normal = Vector3D(0f, 1f, 0.1f)),
-        material = Material(color = Color.GREEN)
-    )
 
     val scene = scene {
+        ambientLightIntensity = 2f
         surface {
             sphere {
                 radius = 1f
@@ -37,6 +26,37 @@ fun main() {
             }
             material {
                 color = Color.RED
+                reflectivity = 0.6f
+            }
+        }
+        surface {
+            sphere {
+                center = Point3D(-1f, -0.5f, 0f)
+                radius = 0.5f
+            }
+            material {
+                color = Color.BLUE
+                reflectivity = 0.7f
+            }
+        }
+        surface {
+            sphere {
+                center = Point3D(-1f, 0.5f, 0f)
+                radius = 0.25f
+            }
+            material {
+                color = Color.WHITE
+                reflectivity = 0.7f
+            }
+        }
+        surface {
+            sphere {
+                center = Point3D(-0.5f, -0.8f, 0.5f)
+                radius = 0.2f
+            }
+            material {
+                color = Color.YELLOW
+                reflectivity = 0.75f
             }
         }
 //        +IntersectionOfSpheres(Sphere(
@@ -46,15 +66,20 @@ fun main() {
 //            center =  Point3D(-0.5f, 0.5f, 0f),
 //            radius = 1f
 //        ))
-        +sphere2
-        +sphere3
-        +plane
+//        +sphere3
+        surface {
+            geometry = Plane(point = Point3D(0.0f, -1f, 0f), normal = Vector3D(0f, 1f, 0.1f))
+            material {
+                color = Color.GREEN
+                reflectivity = 0.7f
+            }
+        }
     }
     println(scene.numberOfSurfaces())
 
     // Create a bitmap with a simple pattern
-    val width = 900
-    val height = 900
+    val width = 700
+    val height = 700
     val bbs = BasicBitmapStorage(width, height)
 
     // Display the bitmap using our new BitmapViewer class with camera position slider
@@ -80,9 +105,9 @@ fun main() {
         Thread.sleep(10)
     }
 
-    var angle = 0.0
+    var angle = Math.PI / 2
     var lastFrameTime = System.currentTimeMillis()
-    val targetFrameTime = 40 // 100ms between frames (10 FPS)
+    val targetFrameTime = 1000 // 100ms between frames (10 FPS)
 
     while (viewer.isVisible()) {
         val currentTime = System.currentTimeMillis()
@@ -90,11 +115,11 @@ fun main() {
 
         if (elapsedTime >= targetFrameTime) {
             val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
-            doRayTracing(bbs, width, height, scene, lightPos)
+            scene.lightPosition = lightPos
+            doRayTracing(bbs, width, height, scene)
             viewer.refresh()
             lastFrameTime = currentTime
             angle += 0.05
-            Thread.sleep(10_000)
         } else {
             // Short sleep to avoid busy-waiting
             Thread.sleep(10)
@@ -118,32 +143,54 @@ private fun doRayTracing(
     width: Int,
     height: Int,
     scene: Scene,
-    lightPos: Point3D
 ) {
     // Draw a red rectangle
     for (x in 0..<width) {
         for (y in 0..<height) {
-            val uvCoordinates = pixelToUV(
-                x,
-                y,
-                ImagePlane(-0.5f, 0.5f, -0.5f, 0.5f),
-                width,
-                height
-            )
-            val ray = rayAtPoint(uvCoordinates.first, uvCoordinates.second)
-            val color = colorOfPixel(
-                scene = scene,
-                lightPos = lightPos,
-                ray = ray
-            )
-            bbs.setPixel(x, y, color.toJavaAwt())
+            var c = Color.BLACK
+            val level = 5
+            for (p in 0..<level) {
+                for (q in 0..<level) {
+                    c += getColorAtPixel(
+                        (x + (p + random()) / level).toFloat(),
+                        (y + (q + random()) / level).toFloat(),
+                        width,
+                        height,
+                        scene
+                    )
+                }
+            }
+            c = (1f / (level * level)) * c
+            bbs.setPixel(x, y, c.toJavaAwt())
         }
     }
+    println("Done drawing pixels.")
 }
 
-fun colorOfPixel(
+private fun getColorAtPixel(
+    x: Float,
+    y: Float,
+    width: Int,
+    height: Int,
+    scene: Scene
+): Color {
+    val uvCoordinates = pixelToUV(
+        x,
+        y,
+        ImagePlane(-0.5f, 0.5f, -0.5f, 0.5f),
+        width,
+        height
+    )
+    val ray = rayAtPoint(uvCoordinates.first, uvCoordinates.second)
+    val color = colorOfRay(
+        scene = scene,
+        ray = ray
+    )
+    return color
+}
+
+fun colorOfRay(
     scene: Scene,
-    lightPos: Point3D,
     ray: Ray,
     interval: Interval = Interval(0f, Float.POSITIVE_INFINITY),
     recursionDepth: Int = 0,
@@ -155,41 +202,47 @@ fun colorOfPixel(
     return scene.hit(ray, interval = interval)?.let {
         val point = it.point
         val normal = it.surface.geometry.normalAtPoint(point)
+        val lightPos = scene.lightPosition
         val lightDir = (lightPos.toVector3D() - point.toVector3D()).normalize()
 
         // Ambient light
         val ka = it.surface.material.color
-        val Iambient = 0.4f
+        val Iambient = scene.ambientLightIntensity
         val ambientIntensity = Iambient * ka;
 
         val rayFromHit = Ray(point, lightDir)
         val res = scene.hit(rayFromHit, Interval(0.00001f, Float.POSITIVE_INFINITY))
 
         val shadowContribution = if (res == null) {
-            val I = 1.0f
+            val I = 2.0f
             val kd = it.surface.material.color
             val lambertian = max(0f, normal dot lightDir) * kd
 
             val vv = -1f * ray.direction
             val h = (vv + lightDir).normalize()
             val ks = Color.WHITE
-            val phong = max(0.0, (normal dot h).toDouble()).pow(50.0).toFloat() * ks
+            val phong = max(0.0, (normal dot h).toDouble()).pow(100.0).toFloat() * ks
 
             I * (lambertian + phong)
         } else {
             Color.BLACK
         }
-        val reflectionVector = ray.direction - 2f * (ray.direction dot normal) * normal
+        val reflectionVector = createReflectionVector(ray, normal)
         val newRay = Ray(point, reflectionVector)
-        val km = Color(0.1f, 0.1f, 0.1f)
-        return ambientIntensity + shadowContribution + km * colorOfPixel(
-            scene,
-            lightPos,
-            newRay,
-            interval = Interval(0.00001f, Float.POSITIVE_INFINITY),
-            recursionDepth + 1
-        )
+        val reflectivity = it.surface.material.reflectivity
+        val color =
+            (1 - reflectivity) * (ambientIntensity + shadowContribution) + reflectivity * colorOfRay(
+                scene,
+                newRay,
+                interval = Interval(0.0001f, Float.POSITIVE_INFINITY),
+                recursionDepth + 1
+            )
+        return color
     } ?: Color.BLACK
+}
+
+private fun createReflectionVector(ray: Ray, normal: Vector3D): Vector3D {
+    return ray.direction - 2f * (ray.direction dot normal) * normal
 }
 
 private fun rayAtPoint(u: Float, v: Float): Ray {
@@ -209,8 +262,8 @@ private fun rayAtPoint(u: Float, v: Float): Ray {
 
 
 fun pixelToUV(
-    i: Int,
-    j: Int,
+    i: Float,
+    j: Float,
     imagePlane: ImagePlane,
     pixelWidth: Int,
     pixelHEight: Int

@@ -4,12 +4,15 @@ import net.fredrikmeyer.BasicBitmapStorage
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Graphics
+import java.awt.KeyboardFocusManager
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
+import javax.swing.AbstractAction
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSlider
+import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
@@ -43,6 +46,17 @@ class BitmapViewer(
             }
         }
 
+        // Make the panel focusable and add key listener to it as well
+        panel.isFocusable = true
+        panel.requestFocusInWindow() // Request focus for the panel
+        panel.addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent) {
+                if (e.keyCode == KeyEvent.VK_ESCAPE) {
+                    close()
+                }
+            }
+        })
+
         // Create a slider for camera position
         slider = jSlider()
 
@@ -68,6 +82,7 @@ class BitmapViewer(
         frame.add(controlPanel, BorderLayout.SOUTH)
         frame.pack()
         frame.isResizable = false
+        frame.isFocusable = true
 
         // Add key listener to close the frame when ESC is pressed
         frame.addKeyListener(object : KeyAdapter() {
@@ -77,6 +92,26 @@ class BitmapViewer(
                 }
             }
         })
+
+        // Add key listener to the content pane as well
+        frame.contentPane.addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent) {
+                if (e.keyCode == KeyEvent.VK_ESCAPE) {
+                    close()
+                }
+            }
+        })
+        frame.contentPane.isFocusable = true
+
+        // Add a global key event dispatcher to handle ESC key regardless of focus
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher { e ->
+            if (e.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_ESCAPE) {
+                close()
+                true // Event handled
+            } else {
+                false // Event not handled
+            }
+        }
     }
 
     private fun jSlider(): JSlider {
@@ -104,6 +139,7 @@ class BitmapViewer(
                 frame.setLocationRelativeTo(null)
             }
             frame.isVisible = true
+            frame.requestFocus()
         }
     }
 
@@ -113,6 +149,7 @@ class BitmapViewer(
     fun refresh() {
         SwingUtilities.invokeLater {
             frame.repaint()
+            frame.requestFocus()
         }
     }
 

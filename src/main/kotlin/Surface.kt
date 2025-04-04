@@ -39,7 +39,8 @@ class UnionOfSpheres(val sphere1: Sphere, val sphere2: Sphere) : Surface {
 
     }
     override val material: Material = Material(
-        color = Color.YELLOW
+        color = Color.YELLOW,
+        reflectivity = 0.0f
     )
 }
 
@@ -67,6 +68,7 @@ class IntersectionOfSpheres(val sphere1: Sphere, val sphere2: Sphere) : Surface 
 
     }
     override val material: Material = Material(
-        color = Color.YELLOW
+        color = Color.YELLOW,
+        reflectivity = 0.0f
     )
 }
