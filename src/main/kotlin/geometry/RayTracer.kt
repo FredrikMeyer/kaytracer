@@ -27,10 +27,10 @@ class RayTracer(private val width: Int, private val height: Int, private val sce
                         val level = 5
                         for (p in 0..<level) {
                             for (q in 0..<level) {
-                                c += getColorAtPixel(
-                                    (x + (p + random()) / level).toFloat(),
-                                    (y + (q + random()) / level).toFloat(),
-                                )
+                                val jitteredX = (x + (p + random()) / level).toFloat()
+                                val jitteredY = (y + (q + random()) / level).toFloat()
+
+                                c += getColorAtPixel(jitteredX, jitteredY)
                             }
                         }
                         c = (1f / (level * level)) * c

@@ -9,10 +9,6 @@ interface Surface {
     val material: Material
 }
 
-class SphericalSurface(override val geometry: Sphere, override val material: Material) : Surface
-
-class PlanarSurface(override val geometry: Plane, override val material: Material) : Surface
-
 class UnionOfSpheres(val sphere1: Sphere, val sphere2: Sphere) : Surface {
     override val geometry: GeometricObject = object : GeometricObject {
         override fun intersect(ray: Ray, interval: Interval): Float? {
