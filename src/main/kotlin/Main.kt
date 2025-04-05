@@ -2,6 +2,10 @@
 
 package net.fredrikmeyer
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.fredrikmeyer.geometry.*
 import net.fredrikmeyer.gui.BitmapViewer
 import java.lang.Math.random
@@ -9,7 +13,8 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sin
-import kotlin.time.*
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 // Variable to store the current camera Z position
 var currentCameraZ = 3.0f
@@ -147,28 +152,43 @@ private fun doRayTracing(
     width: Int,
     height: Int,
     scene: Scene,
-) {
+) = runBlocking {
     val currentInstant = Clock.System.now()
-    // Draw a red rectangle
-    for (x in 0..<width) {
-        for (y in 0..<height) {
-            var c = Color.BLACK
-            val level = 5
-            for (p in 0..<level) {
-                for (q in 0..<level) {
-                    c += getColorAtPixel(
-                        (x + (p + random()) / level).toFloat(),
-                        (y + (q + random()) / level).toFloat(),
-                        width,
-                        height,
-                        scene
-                    )
+    val chunkLength = width / 4
+
+    val pixels = Array(height) { Array(width) { Color.BLACK } }
+
+    val jobs = (0..<width).chunked(chunkLength).map { chunk ->
+        launch(Dispatchers.Default) {
+            for (x in chunk) {
+                for (y in 0..<height) {
+                    var c = Color.BLACK
+                    val level = 5
+                    for (p in 0..<level) {
+                        for (q in 0..<level) {
+                            c += getColorAtPixel(
+                                (x + (p + random()) / level).toFloat(),
+                                (y + (q + random()) / level).toFloat(),
+                                width,
+                                height,
+                                scene
+                            )
+                        }
+                    }
+                    c = (1f / (level * level)) * c
+                    pixels[y][x] =  c
                 }
             }
-            c = (1f / (level * level)) * c
-            bbs.setPixel(x, y, c.toJavaAwt())
         }
     }
+    jobs.joinAll()
+
+    for (y in 0 until height) {
+        for (x in 0 until width) {
+            bbs.setPixel(x, y, pixels[y][x].toJavaAwt())
+        }
+    }
+
     val duration = Clock.System.now() - currentInstant
     println("Done drawing pixels. Took: $duration")
 }
