@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package net.fredrikmeyer
 
 import net.fredrikmeyer.geometry.*
@@ -7,6 +9,7 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.sin
+import kotlin.time.*
 
 // Variable to store the current camera Z position
 var currentCameraZ = 3.0f
@@ -138,12 +141,14 @@ data class ImagePlane(
     val top: Float,
 )
 
+
 private fun doRayTracing(
     bbs: BasicBitmapStorage,
     width: Int,
     height: Int,
     scene: Scene,
 ) {
+    val currentInstant = Clock.System.now()
     // Draw a red rectangle
     for (x in 0..<width) {
         for (y in 0..<height) {
@@ -164,7 +169,8 @@ private fun doRayTracing(
             bbs.setPixel(x, y, c.toJavaAwt())
         }
     }
-    println("Done drawing pixels.")
+    val duration = Clock.System.now() - currentInstant
+    println("Done drawing pixels. Took: $duration")
 }
 
 private fun getColorAtPixel(
