@@ -101,6 +101,18 @@ class SurfaceBuilder {
         geometry = builder.build()
     }
 
+    fun plane(init: PlaneBuilder.() -> Unit) {
+        val builder = PlaneBuilder()
+        builder.init()
+        geometry = builder.build()
+    }
+
+    fun triangle(init: TriangleBuilder.() -> Unit) {
+        val builder = TriangleBuilder()
+        builder.init()
+        geometry = builder.build()
+    }
+
     fun toSurface(): Surface {
         require(geometry != null && material != null) { "Geometry: $geometry, Material: $material" }
 
@@ -108,6 +120,28 @@ class SurfaceBuilder {
             override val geometry: GeometricObject = this@SurfaceBuilder.geometry!!
             override val material: Material = this@SurfaceBuilder.material!!
         }
+    }
+}
+
+@RayTracerDsl
+class PlaneBuilder {
+    var point: Point3D = Point3D(0f, 0f, 0f)
+    var normal: Vector3D = Vector3D(0f, 1f, 0f)
+
+    fun build(): Plane {
+        return Plane(point, normal)
+    }
+}
+
+
+@RayTracerDsl
+class TriangleBuilder {
+    var p1: Point3D = Point3D(0f, 0f, 0f)
+    var p2: Point3D = Point3D(0f, 0f, 0f)
+    var p3: Point3D = Point3D(0f, 0f, 0f)
+
+    fun build(): Triangle {
+        return Triangle(p1, p2, p3)
     }
 }
 

@@ -24,6 +24,10 @@ class UnionOfSpheres(val sphere1: Sphere, val sphere2: Sphere) : Surface {
             return minOf(intersection1, intersection2)
         }
 
+        override fun isOnObject(point: Point3D): Boolean {
+            TODO("Not yet implemented")
+        }
+
         override fun normalAtPoint(point: Point3D): Vector3D {
             if (sphere1.isOnSphere(point)) {
                 return sphere1.normalAtPoint(point)
@@ -32,8 +36,8 @@ class UnionOfSpheres(val sphere1: Sphere, val sphere2: Sphere) : Surface {
             }
             error("Must be on sphere. Point: $point. Distance from sphere1: ${(sphere1.center.toVector3D() - point.toVector3D()).norm()}")
         }
-
     }
+
     override val material: Material = Material(
         color = Color.YELLOW,
         reflectivity = 0.0f
@@ -51,6 +55,10 @@ class IntersectionOfSpheres(val sphere1: Sphere, val sphere2: Sphere) : Surface 
             }
 
             return maxOf(intersection1, intersection2)
+        }
+
+        override fun isOnObject(point: Point3D): Boolean {
+            TODO("Not yet implemented")
         }
 
         override fun normalAtPoint(point: Point3D): Vector3D {

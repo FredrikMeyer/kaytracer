@@ -1,6 +1,7 @@
 package geometry
 
 import net.fredrikmeyer.geometry.Vector3D
+import net.fredrikmeyer.geometry.minus
 import net.fredrikmeyer.geometry.norm
 import net.fredrikmeyer.geometry.times
 import org.assertj.core.api.Assertions.assertThat
@@ -33,5 +34,19 @@ class Vector3DTest {
             assertThat(it.y).isEqualTo(0f)
             assertThat(it.z).isEqualTo(0f)
         })
+    }
+
+    @Test
+    fun `round to 0-1 vector`() {
+        val p = Vector3D(1f, 0.7f, 0.3f)
+        val c = Vector3D(0.5f, 0.5f, 0.5f)
+
+        val d = p - c;
+
+        val res = d.round()
+
+        assertThat(res.x).isEqualTo(1.0f)
+        assertThat(res.y).isEqualTo(0.0f)
+        assertThat(res.z).isEqualTo(0.0f)
     }
 }

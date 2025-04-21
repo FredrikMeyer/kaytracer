@@ -5,7 +5,6 @@ import net.fredrikmeyer.geometry.Sphere
 import net.fredrikmeyer.geometry.Vector3D
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Percentage
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 
 class UnionOfSpheresTest {

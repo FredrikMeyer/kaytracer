@@ -1,5 +1,6 @@
 package net.fredrikmeyer.geometry
 
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 data class Vector3D(val x: Float, val y: Float, val z: Float) {
@@ -20,11 +21,27 @@ data class Vector3D(val x: Float, val y: Float, val z: Float) {
         return Vector3D(c * y - b * z, a * z - c * x, b * x - a * y)
     }
 
+    fun round(): Vector3D {
+        return Vector3D(
+            x.roundToInt().toFloat(),
+            y.roundToInt().toFloat(),
+            z.roundToInt().toFloat()
+        )
+    }
+
     companion object {
         val ZERO = Vector3D(0f, 0f, 0f)
         val X = Vector3D(1f, 0f, 0f)
         val Y = Vector3D(0f, 1f, 0f)
         val Z = Vector3D(0f, 0f, 1f)
+
+        fun random(): Vector3D {
+            return Vector3D(
+                Math.random().toFloat(),
+                Math.random().toFloat(),
+                Math.random().toFloat()
+            )
+        }
     }
 }
 

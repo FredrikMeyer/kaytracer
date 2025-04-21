@@ -16,6 +16,10 @@ data class Sphere(val center: Point3D, val radius: Float) : GeometricObject {
             ?.let { if (interval.contains(it)) it else null }
     }
 
+    override fun isOnObject(point: Point3D): Boolean {
+        return abs((point.toVector3D() - center.toVector3D()).norm() - radius) < 0.000001
+    }
+
     private fun intersectRaySphere(ray: Ray, sphere: Sphere): Float? {
         val dirToSphere = ray.origin.toVector3D() - sphere.center.toVector3D()
         val direction = ray.direction
@@ -31,7 +35,15 @@ data class Sphere(val center: Point3D, val radius: Float) : GeometricObject {
     }
 
     fun isOnSphere(point: Point3D): Boolean {
-        return abs((point.toVector3D() - center.toVector3D()).norm() - radius) < 0.000001
+        return this.isOnObject(point)
+    }
+
+    fun translate(dir: Vector3D): Sphere {
+        return Sphere((center.toVector3D() + dir).toPoint3D(), radius)
+    }
+
+    fun scale(by: Float): Sphere {
+        return Sphere(center, radius * by)
     }
 }
 

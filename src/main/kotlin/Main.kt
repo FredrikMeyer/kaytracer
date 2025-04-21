@@ -1,23 +1,18 @@
-@file:OptIn(ExperimentalTime::class)
 
 package net.fredrikmeyer
 
 import net.fredrikmeyer.geometry.*
 import net.fredrikmeyer.gui.BitmapViewer
+import java.awt.image.BufferedImage
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.time.ExperimentalTime
+
 
 // Variable to store the current camera Z position
 var currentCameraZ = 3.0f
 
-const val MAX_RECURSION_DEPTH = 30
-
-fun main() {
-    println("Hello World!")
-    val union = UnionOfSpheres(Sphere(Point3D(0.0f, 0f, 0f), 1f), Sphere(Point3D(0.5f, 0f, 0f), 1f))
-
-    val scene = scene {
+val scenes = mapOf(
+    "1" to scene {
         ambientLightIntensity = 2f
         surface {
             sphere {
@@ -27,6 +22,17 @@ fun main() {
             material {
                 color = Color.RED
                 reflectivity = 0.6f
+            }
+        }
+        surface {
+            geometry = Triangle(
+                a = Point3D(0.5f, 0.2f, 0f),
+                b = Point3D(1f, 0.2f, 0f),
+                c = Point3D(0f, 1f, 0.3f)
+            )
+            material {
+                color = Color.RED
+                reflectivity = 0.1f
             }
         }
         surface {
@@ -59,14 +65,17 @@ fun main() {
                 reflectivity = 0.75f
             }
         }
-//        +IntersectionOfSpheres(Sphere(
-//            center = Point3D(0.0f, 0f, 0f),
-//            radius = 1f
-//        ), Sphere(
-//            center =  Point3D(-0.5f, 0.5f, 0f),
-//            radius = 1f
-//        ))
-//        +sphere3
+        // Bottom plane
+        surface {
+            sphere {
+                center = Point3D(-0.1f, -0.9f, 0.5f)
+                radius = 0.1f
+            }
+            material {
+                color = Color.MAGENTA
+                reflectivity = 0.85f
+            }
+        }
         surface {
             geometry = Plane(point = Point3D(0.0f, -1f, 0f), normal = Vector3D(0f, 1f, 0.1f))
             material {
@@ -74,8 +83,45 @@ fun main() {
                 reflectivity = 0.7f
             }
         }
-    }
-    println(scene.numberOfSurfaces())
+    },
+    "2" to scene {
+        ambientLightIntensity = 0.2f
+        surface {
+            plane {
+                point = Point3D(0.0f, -1f, 0.0f)
+                normal = Vector3D(0f, 1f, 0.0f)
+            }
+            material {
+                color = Color.WHITE
+                reflectivity = 0.0f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(0.0f, 1.0f, 0.0f)
+                p2 = Point3D(0.0f, 0.0f, 0.0f)
+                p3 = Point3D(1.0f, 0.0f, 0.0f)
+            }
+            material {
+                color = Color.RED
+                reflectivity = 0.0f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(0.0f, 1.0f, 0.0f)
+                p2 = Point3D(1.0f, 0.0f, 0.0f)
+                p3 = Point3D(1.0f, 1.0f, 0f)
+            }
+            material {
+                color = Color.BLUE
+            }
+        }
+    })
+
+fun main() {
+    val scene = scenes["2"]!!
+
 
     // Create a bitmap with a simple pattern
     val width = 700
@@ -109,7 +155,13 @@ fun main() {
     var lastFrameTime = System.currentTimeMillis()
     val targetFrameTime = 1000 // 100ms between frames (10 FPS)
 
-    val rayTracer = RayTracer(width, height, scene)
+    val rayTracer = RayTracer(
+        width = width,
+        height = height,
+        scene = scene,
+        antiAliasMaxLevel = 2,
+        maxRecursionDepth = 3
+    )
 
     while (viewer.isVisible()) {
         val currentTime = System.currentTimeMillis()
@@ -132,6 +184,21 @@ fun main() {
     // The loop has exited, which means the window was closed
     println("Window closed, exiting program")
     viewer.close()
+}
+
+fun staticMain(): BufferedImage {
+    val scene = scenes["1"]!!
+    val rayTracer = RayTracer(
+        width = 700,
+        height = 700,
+        scene = scene,
+        antiAliasMaxLevel = 2,
+        maxRecursionDepth = 3
+    )
+    val bbs = BasicBitmapStorage(700, 700)
+    val colors = rayTracer.doRayTracing()
+    bbs.setPixels(colors)
+    return bbs.image
 }
 
 data class ImagePlane(

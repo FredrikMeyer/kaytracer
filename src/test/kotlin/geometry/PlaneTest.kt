@@ -17,6 +17,7 @@ class PlaneTest {
 
         val ray = Ray(origin = Point3D(0f, 0f, 1f), direction = Vector3D(0f, 0f, -1f))
 
-        assertThat(plane.intersect(ray)).isEqualTo(Point3D(0f, 0f, 0f))
+        val point = ray.pointOnRay(plane.intersect(ray)!!)
+        assertThat(point).isEqualTo(Point3D(0f, 0f, 0f))
     }
 }

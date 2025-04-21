@@ -26,11 +26,13 @@ data class Color(val r: Float, val g: Float, val b: Float) {
         val BLUE = Color(0.0f, 0.0f, 1.0f)
         val GREEN = Color(0.0f, 1.0f, 0.0f)
         val YELLOW = Color(1.0f, 1.0f, 0.0f)
+        val CYAN = Color(0.0f, 1.0f, 1.0f)
+        val MAGENTA = Color(1.0f, 0.0f, 1.0f)
         val BLACK = Color(0.0f, 0.0f, 0.0f)
     }
 }
 
-private const val GAMMA = 1.0f
+private const val GAMMA = 1.5f
 
 private fun Float.gammaEncode(): Float {
     return this.pow(1.0f / GAMMA)

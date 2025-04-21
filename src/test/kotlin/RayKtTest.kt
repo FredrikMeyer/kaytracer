@@ -25,8 +25,6 @@ class RayKtTest {
 
         assertThat(res).isNotNull()
 
-        assertThat(res).isEqualTo(
-            Point3D(0f, 0f, 1f)
-        )
+        assertThat(res).isEqualTo(1.0f)
     }
 }

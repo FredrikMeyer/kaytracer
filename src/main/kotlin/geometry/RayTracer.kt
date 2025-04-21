@@ -9,12 +9,18 @@ import java.lang.Math.random
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+//import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
-class RayTracer(private val width: Int, private val height: Int, private val scene: Scene) {
+//@OptIn(ExperimentalTime::class)
+class RayTracer(
+    private val width: Int,
+    private val height: Int,
+    private val scene: Scene,
+    private val maxRecursionDepth: Int = 3,
+    private val antiAliasMaxLevel: Int = 10
+) {
     fun doRayTracing(): Map<Pair<Int, Int>, Color> = runBlocking {
-        val currentInstant = Clock.System.now()
+//        val currentInstant = Clock.System.now()
         val chunkLength = width / 4
 
         val pixels = Array(height) { Array(width) { Color.BLACK } }
@@ -24,7 +30,7 @@ class RayTracer(private val width: Int, private val height: Int, private val sce
                 for (x in chunk) {
                     for (y in 0..<height) {
                         var c = Color.BLACK
-                        val level = 5
+                        val level = antiAliasMaxLevel
                         for (p in 0..<level) {
                             for (q in 0..<level) {
                                 val jitteredX = (x + (p + random()) / level).toFloat()
@@ -49,8 +55,8 @@ class RayTracer(private val width: Int, private val height: Int, private val sce
             }
         }
 
-        val duration = Clock.System.now() - currentInstant
-        println("Done drawing pixels. Took: $duration")
+//        val duration = Clock.System.now() - currentInstant
+//        println("Done drawing pixels. Took: $duration")
 
         res
     }
@@ -60,10 +66,12 @@ class RayTracer(private val width: Int, private val height: Int, private val sce
         interval: Interval = Interval(0f, Float.POSITIVE_INFINITY),
         recursionDepth: Int = 0,
     ): Color {
-        if (recursionDepth >= MAX_RECURSION_DEPTH) {
+        if (recursionDepth >= maxRecursionDepth) {
             return Color.BLACK
         }
 
+        // Bug i K2??
+        @Suppress("KotlinUnreachableCode")
         return scene.hit(ray, interval = interval)?.let {
             val point = it.point
             val normal = it.surface.geometry.normalAtPoint(point)
