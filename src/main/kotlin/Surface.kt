@@ -36,6 +36,10 @@ class UnionOfSpheres(val sphere1: Sphere, val sphere2: Sphere) : Surface {
             }
             error("Must be on sphere. Point: $point. Distance from sphere1: ${(sphere1.center.toVector3D() - point.toVector3D()).norm()}")
         }
+
+        override fun translate(dir: Vector3D): GeometricObject {
+            TODO("Not yet implemented")
+        }
     }
 
     override val material: Material = Material(
@@ -68,6 +72,10 @@ class IntersectionOfSpheres(val sphere1: Sphere, val sphere2: Sphere) : Surface 
                 return sphere2.normalAtPoint(point)
             }
             error("Must be on sphere. Point: $point. Distance from sphere1: ${(sphere1.center.toVector3D() - point.toVector3D()).norm()}")
+        }
+
+        override fun translate(dir: Vector3D): GeometricObject {
+            TODO("Not yet implemented")
         }
 
     }

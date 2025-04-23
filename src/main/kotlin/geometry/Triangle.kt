@@ -79,4 +79,12 @@ class Triangle(val a: Point3D, val b: Point3D, val c: Point3D) : GeometricObject
     override fun normalAtPoint(point: Point3D): Vector3D {
         return normal
     }
+
+    override fun translate(dir: Vector3D): GeometricObject {
+        return Triangle(
+            a = (a.toVector3D() + dir).toPoint3D(),
+            b = (b.toVector3D() + dir).toPoint3D(),
+            c = (c.toVector3D() + dir).toPoint3D()
+        )
+    }
 }

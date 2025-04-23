@@ -23,9 +23,9 @@ data class Vector3D(val x: Float, val y: Float, val z: Float) {
 
     fun round(): Vector3D {
         return Vector3D(
-            x.roundToInt().toFloat(),
-            y.roundToInt().toFloat(),
-            z.roundToInt().toFloat()
+            if (x.isNaN()) 0.0f else x.roundToInt().toFloat(),
+            if (y.isNaN()) 0.0f else y.roundToInt().toFloat(),
+            if (z.isNaN()) 0.0f else z.roundToInt().toFloat()
         )
     }
 
@@ -51,6 +51,9 @@ infix operator fun Vector3D.plus(other: Vector3D) =
 
 infix operator fun Vector3D.minus(other: Vector3D) =
     Vector3D(this.x - other.x, this.y - other.y, this.z - other.z)
+
+operator fun Vector3D.unaryMinus() =
+    Vector3D(-this.x, -this.y, -this.z)
 
 infix fun Vector3D.dot(other: Vector3D) =
     this.x * other.x + this.y * other.y + this.z * other.z

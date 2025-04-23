@@ -23,4 +23,11 @@ data class Plane(val point: Point3D, val normal: Vector3D) : GeometricObject {
     override fun normalAtPoint(point: Point3D): Vector3D {
         return this.normal
     }
+
+    override fun translate(dir: Vector3D): GeometricObject {
+        return Plane(
+            (point.toVector3D() + dir).toPoint3D(),
+            normal
+        )
+    }
 }

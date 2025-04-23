@@ -96,23 +96,29 @@ val scenes = mapOf(
                 reflectivity = 0.0f
             }
         }
+//        surface {
+//            triangle {
+//                p1 = Point3D(0.0f, 1.0f, 0.0f)
+//                p2 = Point3D(0.0f, 0.0f, 0.0f)
+//                p3 = Point3D(1.0f, 0.0f, 0.0f)
+//            }
+//            material {
+//                color = Color.RED
+//                reflectivity = 0.0f
+//            }
+//        }
+//        surface {
+//            triangle {
+//                p1 = Point3D(0.0f, 1.0f, 0.0f)
+//                p2 = Point3D(1.0f, 0.0f, 0.0f)
+//                p3 = Point3D(1.0f, 1.0f, 0f)
+//            }
+//            material {
+//                color = Color.BLUE
+//            }
+//        }
         surface {
-            triangle {
-                p1 = Point3D(0.0f, 1.0f, 0.0f)
-                p2 = Point3D(0.0f, 0.0f, 0.0f)
-                p3 = Point3D(1.0f, 0.0f, 0.0f)
-            }
-            material {
-                color = Color.RED
-                reflectivity = 0.0f
-            }
-        }
-        surface {
-            triangle {
-                p1 = Point3D(0.0f, 1.0f, 0.0f)
-                p2 = Point3D(1.0f, 0.0f, 0.0f)
-                p3 = Point3D(1.0f, 1.0f, 0f)
-            }
+            geometry = Cube(Point3D(0.0f, 0.0f, -1.0f), Point3D(1.0f, 1.0f, 0.0f))
             material {
                 color = Color.BLUE
             }

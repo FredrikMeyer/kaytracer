@@ -2,6 +2,7 @@ package net.fredrikmeyer.geometry
 
 import net.fredrikmeyer.Interval
 import net.fredrikmeyer.Ray
+import net.fredrikmeyer.linalg.Matrix3x3
 
 interface GeometricObject {
     fun intersect(
@@ -12,34 +13,38 @@ interface GeometricObject {
     fun isOnObject(point: Point3D): Boolean
 
     fun normalAtPoint(point: Point3D): Vector3D
+
+    fun translate(dir: Vector3D): GeometricObject {
+        return object : GeometricObject {
+            override fun intersect(ray: Ray, interval: Interval): Float? {
+                return this.intersect(ray.translate(dir), interval)
+            }
+
+            override fun isOnObject(point: Point3D): Boolean {
+                return this.isOnObject(point.translate(-dir))
+            }
+
+            override fun normalAtPoint(point: Point3D): Vector3D {
+                return this.normalAtPoint(point.translate(-dir))
+            }
+        }
+    }
+
+    fun apply(matrix3x3: Matrix3x3): GeometricObject {
+        return object : GeometricObject {
+            override fun intersect(ray: Ray, interval: Interval): Float? {
+                // Skal være inversen til matrisen her
+                return this.intersect(Ray(ray.origin.apply(matrix3x3), TODO()), interval)
+            }
+
+            override fun isOnObject(point: Point3D): Boolean {
+                return this.isOnObject(point.apply(matrix3x3))
+            }
+
+            override fun normalAtPoint(point: Point3D): Vector3D {
+                return this.normalAtPoint(point.apply(matrix3x3))
+            }
+        }
+    }
 }
 
-class UnionOfGeometricObjects(val obj1: GeometricObject, val obj2: GeometricObject) :
-    GeometricObject {
-    override fun intersect(ray: Ray, interval: Interval): Float? {
-        val intersection1 = obj1.intersect(ray, interval)
-        val intersection2 = obj2.intersect(ray, interval)
-
-        if (intersection1 == null) {
-            return intersection2
-        }
-        if (intersection2 == null) {
-            return intersection1
-        }
-        return minOf(intersection1, intersection2)
-    }
-
-    override fun isOnObject(point: Point3D): Boolean {
-        return obj1.isOnObject(point) || obj2.isOnObject(point)
-    }
-
-    override fun normalAtPoint(point: Point3D): Vector3D {
-        if (obj1.isOnObject(point)) {
-            return obj1.normalAtPoint(point)
-        } else {
-            return obj2.normalAtPoint(point)
-        }
-
-    }
-
-}

@@ -9,6 +9,7 @@ import java.lang.Math.random
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.time.Clock
+
 //import kotlin.time.ExperimentalTime
 
 //@OptIn(ExperimentalTime::class)
@@ -117,6 +118,37 @@ class RayTracer(
         return ray.direction - 2f * (ray.direction dot normal) * normal
     }
 
+    /*
+    fun getRay(x: Double, y: Double): Ray {
+        // Calculate the aspect ratio-adjusted dimensions of the view plane
+        val tanFov = Math.tan(Math.toRadians(fieldOfView / 2))
+        val viewportHeight = tanFov * 2
+        val viewportWidth = viewportHeight * aspectRatio
+
+        // Calculate the ray direction based on the pixel coordinates
+        val pixelX = (x / viewportWidth) - 1
+        val pixelY = 1 - (y / viewportHeight)
+
+        // Calculate the direction of the ray
+        val rayDirection = (right * pixelX + cameraUp * pixelY + forward).normalize()
+
+        return Ray(origin = position, direction = rayDirection)
+    }
+     */
+
+    private fun pixelToUV(
+        i: Float,
+        j: Float,
+        imagePlane: ImagePlane,
+    ): Pair<Float, Float> {
+        val (l, r, b, t) = imagePlane
+        val width = r - l
+        val height = t - b
+        val u = l + width * (i + 0.5f) / this.width;
+        val v = b + height * (j + 0.5f) / this.height;
+        return Pair(u, v)
+    }
+
     private fun getColorAtPixel(
         x: Float,
         y: Float,
@@ -141,24 +173,13 @@ class RayTracer(
         val e = Point3D(0f, 0f, currentCameraZ)
 
         val d = 1f
+        val pointInImagePlane = u * uu + v * vv
+
         val ray = Ray(
             origin = e,
-            direction = (-d * w + (u * uu + v * vv)).normalize()
+            direction = (-d * w + pointInImagePlane).normalize()
         )
         return ray
-    }
-
-    private fun pixelToUV(
-        i: Float,
-        j: Float,
-        imagePlane: ImagePlane,
-    ): Pair<Float, Float> {
-        val (l, r, b, t) = imagePlane
-        val width = r - l
-        val height = t - b
-        val u = l + width * (i + 0.5f) / this.width;
-        val v = b + height * (j + 0.5f) / this.height;
-        return Pair(u, v)
     }
 
 }

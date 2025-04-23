@@ -38,7 +38,7 @@ data class Sphere(val center: Point3D, val radius: Float) : GeometricObject {
         return this.isOnObject(point)
     }
 
-    fun translate(dir: Vector3D): Sphere {
+    override fun translate(dir: Vector3D): Sphere {
         return Sphere((center.toVector3D() + dir).toPoint3D(), radius)
     }
 
@@ -46,5 +46,3 @@ data class Sphere(val center: Point3D, val radius: Float) : GeometricObject {
         return Sphere(center, radius * by)
     }
 }
-
-

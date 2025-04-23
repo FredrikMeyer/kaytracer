@@ -23,7 +23,7 @@ import javax.swing.event.ChangeListener
  */
 class BitmapViewer(
     private val bitmapStorage: BasicBitmapStorage,
-    title: String = "Bitmap Viewer",
+    title: String = "Ray Tracer",
     private var initialCameraZ: Float = 3.0f,
     private var minCameraZ: Float = 1.0f,
     private var maxCameraZ: Float = 10.0f
