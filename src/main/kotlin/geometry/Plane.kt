@@ -4,6 +4,7 @@ import net.fredrikmeyer.Interval
 import net.fredrikmeyer.Ray
 
 data class Plane(val point: Point3D, val normal: Vector3D) : GeometricObject {
+    private val pointVector = point.toVector3D()
     override fun intersect(ray: Ray, interval: Interval): Float? {
         val rayDirectionDotNormal = ray.direction dot normal
         if (rayDirectionDotNormal == 0f) {
@@ -11,7 +12,7 @@ data class Plane(val point: Point3D, val normal: Vector3D) : GeometricObject {
         }
 
         val t =
-            (normal dot (point.toVector3D() - ray.origin.toVector3D())) / rayDirectionDotNormal
+            (normal dot (pointVector - ray.origin.toVector3D())) / rayDirectionDotNormal
 
         return if (interval.contains(t)) t else null
     }
@@ -26,7 +27,7 @@ data class Plane(val point: Point3D, val normal: Vector3D) : GeometricObject {
 
     override fun translate(dir: Vector3D): GeometricObject {
         return Plane(
-            (point.toVector3D() + dir).toPoint3D(),
+            (pointVector + dir).toPoint3D(),
             normal
         )
     }

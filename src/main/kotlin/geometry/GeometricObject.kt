@@ -2,6 +2,7 @@ package net.fredrikmeyer.geometry
 
 import net.fredrikmeyer.Interval
 import net.fredrikmeyer.Ray
+import net.fredrikmeyer.linalg.Matrix3x3
 
 interface GeometricObject {
     fun intersect(
@@ -29,5 +30,21 @@ interface GeometricObject {
         }
     }
 
+    fun apply(matrix3x3: Matrix3x3): GeometricObject {
+        return object : GeometricObject {
+            override fun intersect(ray: Ray, interval: Interval): Float? {
+                // Skal være inversen til matrisen her
+                return this.intersect(Ray(ray.origin.apply(matrix3x3), TODO()), interval)
+            }
+
+            override fun isOnObject(point: Point3D): Boolean {
+                return this.isOnObject(point.apply(matrix3x3))
+            }
+
+            override fun normalAtPoint(point: Point3D): Vector3D {
+                return this.normalAtPoint(point.apply(matrix3x3))
+            }
+        }
+    }
 }
 

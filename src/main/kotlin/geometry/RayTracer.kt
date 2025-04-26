@@ -1,22 +1,16 @@
 package net.fredrikmeyer.geometry
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import net.fredrikmeyer.*
 import java.lang.Math.random
-import java.util.concurrent.Executors
 import kotlin.math.PI
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.pow
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-
-//import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class RayTracer(
@@ -26,36 +20,16 @@ class RayTracer(
     private val maxRecursionDepth: Int = 3,
     private val antiAliasMaxLevel: Int = 10
 ) {
-    private val rayTracingExecutor = Executors.newFixedThreadPool(
-        Runtime.getRuntime().availableProcessors()
-    ).asCoroutineDispatcher()
-
-
     fun doRayTracing(): Map<Pair<Int, Int>, Color> = runBlocking {
         val currentInstant = Clock.System.now()
         val chunkLength = width / 4
         println("Available processors: ${Runtime.getRuntime().availableProcessors()}")
-        val tileSize = width / 2 // Typically 16x16, 32x32 or 64x64 works well
-
-        // Create work tiles
-        val tiles = mutableListOf<Pair<IntRange, IntRange>>()
-        for (y in 0..<height step tileSize) {
-            val yEnd = min(y + tileSize, height)
-            for (x in 0..<width step tileSize) {
-                val xEnd = min(x + tileSize, width)
-                tiles.add(Pair(x..<xEnd, y..<yEnd))
-            }
-        }
-
-        println("Tiles: ${tiles.size}")
         val pixels = Array(height) { Array(width) { Color.BLACK } }
 
-
-        val jobs = tiles.map { (xRange, yRange) ->
-            async(rayTracingExecutor) {
-                for (y in yRange) {
-                    for (x in xRange) {
-
+        val jobs = (0..<width).chunked(chunkLength).map { chunk ->
+            async(Dispatchers.Default) {
+                for (x in chunk) {
+                    for (y in 0..<height) {
                         var c = Color.BLACK
                         val level = antiAliasMaxLevel
                         for (p in 0..<level) {
@@ -70,7 +44,7 @@ class RayTracer(
                         pixels[y][x] = c
                     }
                 }
-                println("Completed tile ${xRange.first}x${yRange.first} at ${Clock.System.now() - currentInstant}")
+                println("Completed chunk of size ${chunk.size} in time  ${Clock.System.now() - currentInstant}.")
             }
         }
         jobs.awaitAll()
@@ -115,7 +89,8 @@ class RayTracer(
         val normal = hit.surface.geometry.normalAtPoint(hitPoint)
         val lightSource = scene.getLightSource()
         val lightPos = lightSource.position
-        val lightDir = (lightPos.toVector3D() - hitPoint.toVector3D()).normalize()
+        val lightDirectionVector = lightPos.toVector3D() - hitPoint.toVector3D()
+        val lightDir = lightDirectionVector.normalize()
 
         val rayFromHitToLight = Ray(hitPoint, lightDir)
 
@@ -124,7 +99,7 @@ class RayTracer(
             scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
 
         color = color + if (shadowIntersection == null) {
-            val distanceToLight = (lightPos.toVector3D() - hitPoint.toVector3D()).normSquared()
+            val distanceToLight = lightDirectionVector.normSquared()
             // Scale intensity with inverse square law
             val I = (lightSource.intensity / (4 * PI * distanceToLight)).toFloat()
             val kd = materialColor

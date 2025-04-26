@@ -24,14 +24,16 @@ data class Sphere(val center: Point3D, val radius: Float) : GeometricObject {
         val dirToSphere = ray.origin.toVector3D() - sphere.center.toVector3D()
         val direction = ray.direction
         val radius = sphere.radius
+        // dir.dirToSpehere - (|d|^2|dirToSphere]^2 - r^2)
+        val f = direction dot dirToSphere
         val discriminant =
-            (direction dot dirToSphere).squared() - (direction dot direction) * ((dirToSphere dot dirToSphere) - radius.squared())
+            f.squared() - (direction.normSquared()) * (dirToSphere.normSquared() - radius.squared())
 
         if (discriminant < 0) {
             return null
         }
 
-        return (-(direction dot dirToSphere) - sqrt(discriminant)) / (direction dot direction)
+        return (-f - sqrt(discriminant)) / (direction.normSquared())
     }
 
     fun isOnSphere(point: Point3D): Boolean {

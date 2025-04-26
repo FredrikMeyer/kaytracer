@@ -1,8 +1,6 @@
 package net.fredrikmeyer.linalg
 
 import net.fredrikmeyer.geometry.Vector3D
-import net.fredrikmeyer.geometry.dot
-import net.fredrikmeyer.geometry.minus
 import net.fredrikmeyer.geometry.plus
 
 /**
