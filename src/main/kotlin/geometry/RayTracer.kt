@@ -61,60 +61,64 @@ class RayTracer(
         res
     }
 
-    private fun colorOfRay(
+    private tailrec fun colorOfRay(
         ray: Ray,
+        accumulatedColor: Color = Color.BLACK,
         interval: Interval = Interval(0f, Float.POSITIVE_INFINITY),
         recursionDepth: Int = 0,
     ): Color {
         if (recursionDepth >= maxRecursionDepth) {
-            return Color.BLACK
+            return accumulatedColor
         }
 
-        // Bug i K2??
-        @Suppress("KotlinUnreachableCode")
-        return scene.hit(ray, interval = interval)?.let {
-            val point = it.point
-            val normal = it.surface.geometry.normalAtPoint(point)
-            val lightSource = scene.getLightSource()
-            val lightPos = lightSource.position
-            val lightDir = (lightPos.toVector3D() - point.toVector3D()).normalize()
+        val hit = scene.hit(ray, interval = interval)
+        if (hit == null) {
+            return accumulatedColor
+        }
 
-            // Ambient light
-            val material = it.surface.material
-            val materialColor = material.color
+        val it = hit
+        val point = it.point
+        val normal = it.surface.geometry.normalAtPoint(point)
+        val lightSource = scene.getLightSource()
+        val lightPos = lightSource.position
+        val lightDir = (lightPos.toVector3D() - point.toVector3D()).normalize()
 
-            val ka = materialColor
-            val Iambient = scene.ambientLightIntensity
-            val ambientIntensity = Iambient * ka;
+        // Ambient light
+        val material = it.surface.material
+        val materialColor = material.color
 
-            val rayFromHitToLight = Ray(point, lightDir)
-            val res = scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
+        val ka = materialColor
+        val Iambient = scene.ambientLightIntensity
+        val ambientIntensity = Iambient * ka;
 
-            val shadowContribution = if (res == null) {
-                val I = lightSource.intensity
-                val kd = materialColor
-                val lambertian = max(0f, normal dot lightDir) * kd
+        val rayFromHitToLight = Ray(point, lightDir)
+        val res = scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
 
-                val vv = -1f * ray.direction
-                val h = (vv + lightDir).normalize()
-                val ks = material.specularCoefficient
-                val phong = max(0.0, (normal dot h).toDouble()).pow(100.0).toFloat() * ks
+        val shadowContribution = if (res == null) {
+            val I = lightSource.intensity
+            val kd = materialColor
+            val lambertian = max(0f, normal dot lightDir) * kd
 
-                I * (lambertian + phong)
-            } else {
-                Color.BLACK
-            }
-            val reflectionVector = createReflectionVector(ray, normal)
-            val newRay = Ray(point, reflectionVector)
-            val reflectivity = material.reflectivity
-            val color =
-                (1 - reflectivity) * (ambientIntensity + shadowContribution) + reflectivity * colorOfRay(
-                    newRay,
-                    interval = Interval(0.0001f, Float.POSITIVE_INFINITY),
-                    recursionDepth + 1
-                )
-            return color
-        } ?: Color.BLACK
+            val vv = -1f * ray.direction
+            val h = (vv + lightDir).normalize()
+            val ks = material.specularCoefficient
+            val phong = max(0.0, (normal dot h).toDouble()).pow(100.0).toFloat() * ks
+
+            I * (lambertian + phong)
+        } else {
+            Color.BLACK
+        }
+        val reflectionVector = createReflectionVector(ray, normal)
+        val newRay = Ray(point, reflectionVector)
+        val reflectivity = material.reflectivity
+
+        val acc = accumulatedColor + (1 - reflectivity) * (ambientIntensity + shadowContribution)
+        return colorOfRay(
+            newRay,
+            accumulatedColor = acc,
+            interval = Interval(0.0001f, Float.POSITIVE_INFINITY),
+            recursionDepth + 1
+        )
     }
 
     private fun createReflectionVector(ray: Ray, normal: Vector3D): Vector3D {
