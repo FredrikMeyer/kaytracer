@@ -3,7 +3,18 @@ package net.fredrikmeyer.geometry
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
+
 data class Vector3D(val x: Float, val y: Float, val z: Float) {
+
+    val normalized: Vector3D by lazy {
+        val norm = this.norm()
+        if (norm == 0f) {
+            this
+        } else {
+            Vector3D(x / norm, y / norm, z / norm)
+        }
+    }
+
     fun normalize(): Vector3D {
         val norm = this.norm()
         if (norm == 0f) {
@@ -62,3 +73,5 @@ infix operator fun Float.times(other: Vector3D) =
     Vector3D(this * other.x, this * other.y, this * other.z)
 
 fun Vector3D.norm() = sqrt(this.dot(this))
+
+fun Vector3D.normSquared() = this.dot(this)

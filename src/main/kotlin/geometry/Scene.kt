@@ -47,7 +47,7 @@ class Scene(
                 .mapNotNull { obj ->
                     obj.geometry.intersect(ray, interval)?.let {
                         // To avoid far away artifacts
-                        if (it > 100f) return@mapNotNull null
+                        if (it > 50f) return@let null
                         Pair(obj, it)
                     }
                 }

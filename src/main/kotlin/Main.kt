@@ -141,8 +141,8 @@ fun main() {
         width = width,
         height = height,
         scene = scene,
-        antiAliasMaxLevel = 2,
-        maxRecursionDepth = 3
+        antiAliasMaxLevel = 10,
+        maxRecursionDepth = 30
     )
 
     while (viewer.isVisible()) {
