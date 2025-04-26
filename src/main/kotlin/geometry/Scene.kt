@@ -118,6 +118,10 @@ class LightSourceBuilder {
     var position: Point3D = Point3D(0f, 0f, 0f)
     var intensity: Float = 2.0f
 
+    fun position(x: Float, y: Float, z: Float) {
+        position = Point3D(x, y, z)
+    }
+
     fun build(): LightSource {
         return LightSource(position, intensity)
     }

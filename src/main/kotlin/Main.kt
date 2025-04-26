@@ -2,7 +2,6 @@ package net.fredrikmeyer
 
 import net.fredrikmeyer.geometry.*
 import net.fredrikmeyer.gui.BitmapViewer
-import java.awt.image.BufferedImage
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -168,27 +167,5 @@ fun main() {
     println("Window closed, exiting program")
     viewer.close()
 }
-
-fun staticMain(): BufferedImage {
-    val scene = scenes["1"]!!
-    val rayTracer = RayTracer(
-        width = 700,
-        height = 700,
-        scene = scene,
-        antiAliasMaxLevel = 2,
-        maxRecursionDepth = 3
-    )
-    val bbs = BasicBitmapStorage(700, 700)
-    val colors = rayTracer.doRayTracing()
-    bbs.setPixels(colors)
-    return bbs.image
-}
-
-data class ImagePlane(
-    val left: Float,
-    val right: Float,
-    val bottom: Float,
-    val top: Float,
-)
 
 
