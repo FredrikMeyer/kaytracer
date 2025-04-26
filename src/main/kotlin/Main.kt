@@ -1,4 +1,3 @@
-
 package net.fredrikmeyer
 
 import net.fredrikmeyer.geometry.*
@@ -14,6 +13,10 @@ var currentCameraZ = 3.0f
 val scenes = mapOf(
     "1" to scene {
         ambientLightIntensity = 2f
+        lightSource {
+            position = Point3D(1.5f, 1.5f, 1.5f)
+            intensity = 2f
+        }
         surface {
             sphere {
                 radius = 1f
@@ -43,6 +46,7 @@ val scenes = mapOf(
             material {
                 color = Color.BLUE
                 reflectivity = 0.7f
+                specularCoefficient = Color.WHITE
             }
         }
         surface {
@@ -86,6 +90,11 @@ val scenes = mapOf(
     },
     "2" to scene {
         ambientLightIntensity = 0.2f
+        lightSource {
+            position = Point3D(1.5f, 1.5f, 1.5f)
+            intensity = 2f
+        }
+        lightSource { position = Point3D(-1f, -0.5f, 0f) }
         surface {
             plane {
                 point = Point3D(0.0f, -1f, 0.0f)
@@ -96,27 +105,6 @@ val scenes = mapOf(
                 reflectivity = 0.0f
             }
         }
-//        surface {
-//            triangle {
-//                p1 = Point3D(0.0f, 1.0f, 0.0f)
-//                p2 = Point3D(0.0f, 0.0f, 0.0f)
-//                p3 = Point3D(1.0f, 0.0f, 0.0f)
-//            }
-//            material {
-//                color = Color.RED
-//                reflectivity = 0.0f
-//            }
-//        }
-//        surface {
-//            triangle {
-//                p1 = Point3D(0.0f, 1.0f, 0.0f)
-//                p2 = Point3D(1.0f, 0.0f, 0.0f)
-//                p3 = Point3D(1.0f, 1.0f, 0f)
-//            }
-//            material {
-//                color = Color.BLUE
-//            }
-//        }
         surface {
             geometry = Cube(Point3D(0.0f, 0.0f, -1.0f), Point3D(1.0f, 1.0f, 0.0f))
             material {
@@ -126,7 +114,7 @@ val scenes = mapOf(
     })
 
 fun main() {
-    val scene = scenes["2"]!!
+    val scene = scenes["1"]!!
 
 
     // Create a bitmap with a simple pattern
@@ -175,7 +163,7 @@ fun main() {
 
         if (elapsedTime >= targetFrameTime) {
             val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
-            scene.lightPosition = lightPos
+//            scene.updateLightPosition(lightPos)
             val colors = rayTracer.doRayTracing()
             bbs.setPixels(colors)
             viewer.refresh()

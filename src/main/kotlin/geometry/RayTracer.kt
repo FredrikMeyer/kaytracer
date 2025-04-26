@@ -8,7 +8,6 @@ import net.fredrikmeyer.*
 import java.lang.Math.random
 import kotlin.math.max
 import kotlin.math.pow
-import kotlin.time.Clock
 
 //import kotlin.time.ExperimentalTime
 
@@ -76,25 +75,29 @@ class RayTracer(
         return scene.hit(ray, interval = interval)?.let {
             val point = it.point
             val normal = it.surface.geometry.normalAtPoint(point)
-            val lightPos = scene.lightPosition
+            val lightSource = scene.getLightSource()
+            val lightPos = lightSource.position
             val lightDir = (lightPos.toVector3D() - point.toVector3D()).normalize()
 
             // Ambient light
-            val ka = it.surface.material.color
+            val material = it.surface.material
+            val materialColor = material.color
+
+            val ka = materialColor
             val Iambient = scene.ambientLightIntensity
             val ambientIntensity = Iambient * ka;
 
-            val rayFromHit = Ray(point, lightDir)
-            val res = scene.hit(rayFromHit, Interval(0.00001f, Float.POSITIVE_INFINITY))
+            val rayFromHitToLight = Ray(point, lightDir)
+            val res = scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
 
             val shadowContribution = if (res == null) {
-                val I = 2.0f
-                val kd = it.surface.material.color
+                val I = lightSource.intensity
+                val kd = materialColor
                 val lambertian = max(0f, normal dot lightDir) * kd
 
                 val vv = -1f * ray.direction
                 val h = (vv + lightDir).normalize()
-                val ks = Color.WHITE
+                val ks = material.specularCoefficient
                 val phong = max(0.0, (normal dot h).toDouble()).pow(100.0).toFloat() * ks
 
                 I * (lambertian + phong)
@@ -103,7 +106,7 @@ class RayTracer(
             }
             val reflectionVector = createReflectionVector(ray, normal)
             val newRay = Ray(point, reflectionVector)
-            val reflectivity = it.surface.material.reflectivity
+            val reflectivity = material.reflectivity
             val color =
                 (1 - reflectivity) * (ambientIntensity + shadowContribution) + reflectivity * colorOfRay(
                     newRay,

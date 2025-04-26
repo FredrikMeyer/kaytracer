@@ -8,11 +8,34 @@ data class Hit(
     val surface: Surface
 )
 
+data class LightSource(
+    val position: Point3D,
+    val intensity: Float
+)
+
 class Scene(
     private val objects: List<Surface>,
     val ambientLightIntensity: Float = 0.5f,
-    var lightPosition: Point3D = Point3D(0f, 0f, 0f)
+    private var lightSources: List<LightSource> = listOf(
+        LightSource(
+            position = Point3D(0f, 0f, 0f),
+            intensity = 2.0f
+        )
+    )
 ) {
+
+    fun updateLightPosition(lightPosition: Point3D) {
+        this.lightSources = listOf(lightSources.first().copy(position = lightPosition))
+    }
+
+    fun getLightSource(): LightSource {
+        return lightSources.first()
+    }
+
+    fun getLightSources(): List<LightSource> {
+        return lightSources
+    }
+
     fun hit(
         ray: Ray,
         interval: Interval = Interval(0f, Float.POSITIVE_INFINITY)
@@ -60,6 +83,7 @@ fun scene(init: SceneBuilder.() -> Unit): Scene {
 @RayTracerDsl
 class SceneBuilder {
     private val surfaces = mutableListOf<Surface>()
+    private val lightSources = mutableListOf<LightSource>()
     var ambientLightIntensity: Float = 0.5f
 
     fun surface(init: SurfaceBuilder.() -> Unit) {
@@ -68,12 +92,32 @@ class SceneBuilder {
         surfaces.add(builder.toSurface())
     }
 
+    fun lightSource(init: LightSourceBuilder.() -> Unit) {
+        val lightSourceBuilder = LightSourceBuilder()
+        lightSourceBuilder.init()
+        lightSources.add(lightSourceBuilder.build())
+    }
+
     operator fun Surface.unaryPlus() {
         surfaces.add(this)
     }
 
     fun build(): Scene {
-        return Scene(surfaces, ambientLightIntensity)
+        return if (lightSources.isEmpty()) {
+            Scene(surfaces, ambientLightIntensity)
+        } else {
+            Scene(surfaces, ambientLightIntensity, lightSources)
+        }
+    }
+}
+
+@RayTracerDsl
+class LightSourceBuilder {
+    var position: Point3D = Point3D(0f, 0f, 0f)
+    var intensity: Float = 2.0f
+
+    fun build(): LightSource {
+        return LightSource(position, intensity)
     }
 }
 
@@ -159,8 +203,9 @@ class SphereBuilder {
 class MaterialBuilder {
     var color: Color = Color.WHITE
     var reflectivity: Float = 0.3f
+    var specularCoefficient: Color = Color.GRAY_LIGHT
 
     fun build(): Material {
-        return Material(color, reflectivity)
+        return Material(color, specularCoefficient, reflectivity)
     }
 }
