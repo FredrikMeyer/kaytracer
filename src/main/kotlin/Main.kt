@@ -15,7 +15,7 @@ val scenes = mapOf(
         ambientLightIntensity = 2f
         lightSource {
             position = Point3D(1.5f, 1.5f, 1.5f)
-            intensity = 2f
+            intensity = 100f
         }
         surface {
             sphere {
@@ -25,17 +25,6 @@ val scenes = mapOf(
             material {
                 color = Color.RED
                 reflectivity = 0.6f
-            }
-        }
-        surface {
-            geometry = Triangle(
-                a = Point3D(0.5f, 0.2f, 0f),
-                b = Point3D(1f, 0.2f, 0f),
-                c = Point3D(0f, 1f, 0.3f)
-            )
-            material {
-                color = Color.RED
-                reflectivity = 0.1f
             }
         }
         surface {
@@ -163,7 +152,7 @@ fun main() {
 
         if (elapsedTime >= targetFrameTime) {
             val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
-//            scene.updateLightPosition(lightPos)
+            scene.updateLightPosition(lightPos)
             val colors = rayTracer.doRayTracing()
             bbs.setPixels(colors)
             viewer.refresh()

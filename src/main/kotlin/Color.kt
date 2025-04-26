@@ -16,8 +16,8 @@ data class Color(val r: Float, val g: Float, val b: Float) {
     }
 
     fun toJavaAwt(): AwtColor {
-        val (r,g,b) = this.clamp()
-        return AwtColor(r.gammaEncode(), g.gammaEncode(), b.gammaEncode())
+//        val (r,g,b) = this.clamp()
+        return AwtColor(r.gammaEncode().clamp(), g.gammaEncode().clamp(), b.gammaEncode().clamp())
     }
 
     companion object {
@@ -33,7 +33,7 @@ data class Color(val r: Float, val g: Float, val b: Float) {
     }
 }
 
-private const val GAMMA = 1.5f
+private const val GAMMA = 2f
 
 private fun Float.gammaEncode(): Float {
     return this.pow(1.0f / GAMMA)
@@ -41,6 +41,10 @@ private fun Float.gammaEncode(): Float {
 
 private fun Float.gammaDecode(): Float {
     return this.pow(GAMMA)
+}
+
+private fun Float.clamp(): Float {
+    return this.coerceIn(0.0f, 1.0f)
 }
 
 infix operator fun Float.times(other: Color) =

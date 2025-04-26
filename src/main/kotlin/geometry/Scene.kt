@@ -10,7 +10,9 @@ data class Hit(
 
 data class LightSource(
     val position: Point3D,
-    val intensity: Float
+    val intensity: Float,
+    // Ikke i bruk??
+    val color: Color = Color.WHITE
 )
 
 class Scene(
@@ -193,6 +195,10 @@ class TriangleBuilder {
 class SphereBuilder {
     var center: Point3D = Point3D(0f, 0f, 0f)
     var radius: Float = 1f
+
+    fun center(x: Float, y: Float, z: Float) {
+        center = Point3D(x, y, z)
+    }
 
     fun build(): Sphere {
         return Sphere(center, radius)

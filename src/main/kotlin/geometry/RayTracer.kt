@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.fredrikmeyer.*
 import java.lang.Math.random
+import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.pow
 
@@ -76,26 +77,29 @@ class RayTracer(
             return accumulatedColor
         }
 
-        val it = hit
-        val point = it.point
-        val normal = it.surface.geometry.normalAtPoint(point)
-        val lightSource = scene.getLightSource()
-        val lightPos = lightSource.position
-        val lightDir = (lightPos.toVector3D() - point.toVector3D()).normalize()
+        val hitPoint = hit.point
+        val material = hit.surface.material
 
         // Ambient light
-        val material = it.surface.material
+        // k_a
         val materialColor = material.color
+        var color = scene.ambientLightIntensity * materialColor
 
-        val ka = materialColor
-        val Iambient = scene.ambientLightIntensity
-        val ambientIntensity = Iambient * ka;
+        val normal = hit.surface.geometry.normalAtPoint(hitPoint)
+        val lightSource = scene.getLightSource()
+        val lightPos = lightSource.position
+        val lightDir = (lightPos.toVector3D() - hitPoint.toVector3D()).normalize()
 
-        val rayFromHitToLight = Ray(point, lightDir)
-        val res = scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
+        val rayFromHitToLight = Ray(hitPoint, lightDir)
 
-        val shadowContribution = if (res == null) {
-            val I = lightSource.intensity
+        // Compute if the ray from the hit point to the light source intersects with any object
+        val shadowIntersection =
+            scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
+
+        color = color + if (shadowIntersection == null) {
+            val distanceToLight = (lightPos.toVector3D() - hitPoint.toVector3D()).norm()
+            // Scale intensity with inverse square law
+            val I = (lightSource.intensity / (4 * PI * distanceToLight.squared())).toFloat()
             val kd = materialColor
             val lambertian = max(0f, normal dot lightDir) * kd
 
@@ -109,10 +113,10 @@ class RayTracer(
             Color.BLACK
         }
         val reflectionVector = createReflectionVector(ray, normal)
-        val newRay = Ray(point, reflectionVector)
+        val newRay = Ray(hitPoint, reflectionVector)
         val reflectivity = material.reflectivity
 
-        val acc = accumulatedColor + (1 - reflectivity) * (ambientIntensity + shadowContribution)
+        val acc = accumulatedColor + (1 - reflectivity) * color
         return colorOfRay(
             newRay,
             accumulatedColor = acc,
@@ -125,24 +129,6 @@ class RayTracer(
         return ray.direction - 2f * (ray.direction dot normal) * normal
     }
 
-    /*
-    fun getRay(x: Double, y: Double): Ray {
-        // Calculate the aspect ratio-adjusted dimensions of the view plane
-        val tanFov = Math.tan(Math.toRadians(fieldOfView / 2))
-        val viewportHeight = tanFov * 2
-        val viewportWidth = viewportHeight * aspectRatio
-
-        // Calculate the ray direction based on the pixel coordinates
-        val pixelX = (x / viewportWidth) - 1
-        val pixelY = 1 - (y / viewportHeight)
-
-        // Calculate the direction of the ray
-        val rayDirection = (right * pixelX + cameraUp * pixelY + forward).normalize()
-
-        return Ray(origin = position, direction = rayDirection)
-    }
-     */
-
     private fun pixelToUV(
         i: Float,
         j: Float,
@@ -151,8 +137,8 @@ class RayTracer(
         val (l, r, b, t) = imagePlane
         val width = r - l
         val height = t - b
-        val u = l + width * (i + 0.5f) / this.width;
-        val v = b + height * (j + 0.5f) / this.height;
+        val u = l + width * (i + 0.5f) / this.width
+        val v = b + height * (j + 0.5f) / this.height
         return Pair(u, v)
     }
 
