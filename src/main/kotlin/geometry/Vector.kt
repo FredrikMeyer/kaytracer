@@ -4,6 +4,11 @@ import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 data class Vector3D(val x: Float, val y: Float, val z: Float) {
+    init {
+        if (x.isNaN() || y.isNaN() || z.isNaN()) {
+            throw IllegalArgumentException("Vector3D cannot contain NaN values")
+        }
+    }
 
     fun normalize(): Vector3D {
         val norm = this.norm()
@@ -34,9 +39,9 @@ data class Vector3D(val x: Float, val y: Float, val z: Float) {
 
     fun round(): Vector3D {
         return Vector3D(
-            if (x.isNaN()) 0.0f else x.roundToInt().toFloat(),
-            if (y.isNaN()) 0.0f else y.roundToInt().toFloat(),
-            if (z.isNaN()) 0.0f else z.roundToInt().toFloat()
+            x.roundToInt().toFloat(),
+            y.roundToInt().toFloat(),
+            z.roundToInt().toFloat()
         )
     }
 

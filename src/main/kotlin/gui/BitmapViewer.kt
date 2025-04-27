@@ -7,15 +7,11 @@ import java.awt.Graphics
 import java.awt.KeyboardFocusManager
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
-import javax.swing.AbstractAction
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSlider
-import javax.swing.KeyStroke
 import javax.swing.SwingUtilities
-import javax.swing.event.ChangeEvent
-import javax.swing.event.ChangeListener
 
 /**
  * A class for displaying the bitmap stored in BasicBitmapStorage.
@@ -30,8 +26,8 @@ class BitmapViewer(
 ) {
     private val frame: JFrame = JFrame(title)
     private var cameraPositionChangeListener: ((Float) -> Unit)? = null
-    private val slider: JSlider
-    private val valueLabel: JLabel
+    private val distanceSlider: JSlider
+    private val distanceSliderValueLabel: JLabel
 
     init {
         // Create a panel that displays the image
@@ -58,22 +54,22 @@ class BitmapViewer(
         })
 
         // Create a slider for camera position
-        slider = jSlider()
+        distanceSlider = jSlider()
 
 
-        valueLabel = JLabel("Camera Z: $initialCameraZ")
+        distanceSliderValueLabel = JLabel("Camera Z: $initialCameraZ")
 
-        slider.addChangeListener { e ->
-            val value = (slider.value / 10.0f)
-            valueLabel.text = "Camera Z: $value"
+        distanceSlider.addChangeListener { e ->
+            val value = (distanceSlider.value / 10.0f)
+            distanceSliderValueLabel.text = "Camera Z: $value"
             cameraPositionChangeListener?.invoke(value)
         }
 
         // Create control panel
         val controlPanel = JPanel()
         controlPanel.add(JLabel("Camera Distance:"))
-        controlPanel.add(slider)
-        controlPanel.add(valueLabel)
+        controlPanel.add(distanceSlider)
+        controlPanel.add(distanceSliderValueLabel)
 
         // Set up the frame with BorderLayout
         frame.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
@@ -185,7 +181,7 @@ class BitmapViewer(
      * @return The current camera Z position.
      */
     fun getCurrentCameraZ(): Float {
-        return slider.value / 10.0f
+        return distanceSlider.value / 10.0f
     }
 
     /**
@@ -195,7 +191,7 @@ class BitmapViewer(
      */
     fun setCameraZ(cameraZ: Float) {
         val sliderValue = (cameraZ * 10).toInt()
-        slider.value = sliderValue
+        distanceSlider.value = sliderValue
         // The change listener will be triggered automatically
     }
 }

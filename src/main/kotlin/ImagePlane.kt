@@ -2,7 +2,15 @@ package net.fredrikmeyer
 
 data class ImagePlane(
     val left: Float,
-    val right: Float,
+    private val right: Float,
     val bottom: Float,
-    val top: Float,
-)
+    private val top: Float,
+) {
+    fun width(): Float {
+        return right - left
+    }
+
+    fun height(): Float {
+        return top - bottom
+    }
+}

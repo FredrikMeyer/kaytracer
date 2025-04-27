@@ -9,6 +9,12 @@ import kotlin.math.sin
 // Variable to store the current camera Z position
 var currentCameraZ = 3.0f
 
+val config = RayTracerConfig(
+    width = 700,
+    height = 700,
+    antiAliasMaxLevel = 2,
+    maxRecursionDepth = 30
+)
 
 val scenes = mapOf(
     "1" to scene {
@@ -58,7 +64,6 @@ val scenes = mapOf(
                 reflectivity = 0.75f
             }
         }
-        // Bottom plane
         surface {
             sphere {
                 center = Point3D(-0.1f, -0.9f, 0.5f)
@@ -69,8 +74,9 @@ val scenes = mapOf(
                 reflectivity = 0.85f
             }
         }
+        // Bottom plane
         surface {
-            geometry = Plane(point = Point3D(0.0f, -1f, 0f), normal = Vector3D(0f, 1f, 0.1f))
+            geometry = Plane(point = Point3D(0.0f, -1f, 0f), normal = Vector3D(0f, 1f, 0.0f))
             material {
                 color = Color.GREEN
                 reflectivity = 0.7f
@@ -79,32 +85,68 @@ val scenes = mapOf(
     },
     "2" to scene {
         ambientLightIntensity = 0.2f
+//        lightSource {
+//            position = Point3D(1.5f, 1.5f, 1.5f)
+//            intensity = 0.2f
+//        }
         lightSource {
-            position = Point3D(1.5f, 1.5f, 1.5f)
-            intensity = 2f
+            position(0f, 3.0f, 0f)
+            intensity = 100000f
         }
-        lightSource { position(-1f, -0.5f, 0f) }
+        lightSource {
+            position(0f, -3.0f, 0f)
+            intensity = 100000f
+        }
+        lightSource {
+            position(1.5f, 0.5f, 0.5f)
+            intensity = 1000000000f
+        }
+//        surface {
+//            plane {
+//                point = Point3D(0.0f, -1f, 0.0f)
+//                normal = Vector3D(0f, 1f, 0.0f)
+//            }
+//            material {
+//                color = Color.WHITE
+//                reflectivity = 0.5f
+//            }
+//        }
         surface {
-            plane {
-                point = Point3D(0.0f, -1f, 0.0f)
-                normal = Vector3D(0f, 1f, 0.0f)
+            sphere {
+                radius = 0.25f
+                center(-0.7f, 0.9f, 0.0f)
             }
             material {
-                color = Color.WHITE
-                reflectivity = 0.0f
+                color = Color.RED
+                reflectivity = 0.6f
             }
         }
         surface {
-            geometry = Cube(Point3D(0.0f, 0.0f, -1.0f), Point3D(1.0f, 1.0f, 0.0f))
+            geometry = Cube(Point3D(0.0f, -1f, -1.0f), Point3D(1.0f, 0.0f, 0.0f))
+            material {
+                color = Color.GREEN
+                reflectivity = 0.5f
+                phongCoefficient = 20.0
+            }
+        }
+        surface {
+            geometry = Cube(Point3D(0.0f, -1f, -1.0f), Point3D(1.0f, 0.0f, 0.0f)).translate(
+                Vector3D(
+                    -2.0f,
+                    1.0f,
+                    0.0f
+                )
+            )
             material {
                 color = Color.BLUE
+                reflectivity = 0.3f
             }
         }
     })
 
 fun main() {
-    val scene = scenes["1"]!!
-
+    val scene = scenes["2"]!!
+    println(scene)
 
     // Create a bitmap with a simple pattern
     val width = 700
@@ -138,12 +180,15 @@ fun main() {
     var lastFrameTime = System.currentTimeMillis()
     val targetFrameTime = 1000 // 100ms between frames (10 FPS)
 
+    val camera = Camera(
+        seeFrom = Point3D(0.5f, 0f, 10f),
+        lookAt = Point3D(0, 0, 0)
+    )
+
     val rayTracer = RayTracer(
-        width = width,
-        height = height,
         scene = scene,
-        antiAliasMaxLevel = 2,
-        maxRecursionDepth = 30
+        config = config,
+        camera = camera,
     )
 
     while (viewer.isVisible()) {
@@ -152,14 +197,19 @@ fun main() {
 
         if (elapsedTime >= targetFrameTime) {
             val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
-            scene.updateLightPosition(lightPos)
+//            scene.updateLightPosition(lightPos)
+            camera.seeFrom = Point3D(
+                x = 0.5 + currentCameraZ * cos(angle),
+                z = currentCameraZ * sin(angle),
+                y = 0.0
+            )
             rayTracer.doRayTracing({
                 bbs.setPixels(it)
                 viewer.refresh()
             })
             viewer.refresh()
             lastFrameTime = currentTime
-            angle += 0.05
+            angle += 0.5
         } else {
             // Short sleep to avoid busy-waiting
             Thread.sleep(10)

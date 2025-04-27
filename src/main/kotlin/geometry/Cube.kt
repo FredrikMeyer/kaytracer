@@ -2,6 +2,7 @@ package net.fredrikmeyer.geometry
 
 import net.fredrikmeyer.Interval
 import net.fredrikmeyer.Ray
+import java.lang.Math.random
 
 /**
  * An axis-aligned cube, defined by [cornerNear] and [cornerFar].
@@ -16,6 +17,9 @@ data class Cube(val cornerNear: Point3D, val cornerFar: Point3D) : GeometricObje
     }
 
     private val center = 0.5f * (cornerNear.toVector3D() + cornerFar.toVector3D())
+    private val dx = 0.5f * abs(cornerFar.x - cornerNear.x)
+    private val dy = 0.5f * abs(cornerFar.y - cornerNear.y)
+    private val dz = 0.5f * abs(cornerFar.z - cornerNear.z)
 
     override fun intersect(ray: Ray, interval: Interval): Float? {
         val dir = ray.direction
@@ -36,7 +40,7 @@ data class Cube(val cornerNear: Point3D, val cornerFar: Point3D) : GeometricObje
             return null
         }
 
-        return tNear.coerceIn(interval) //?
+        return if (interval.contains(tNear)) tNear else null
     }
 
     override fun isOnObject(point: Point3D): Boolean {
@@ -44,9 +48,15 @@ data class Cube(val cornerNear: Point3D, val cornerFar: Point3D) : GeometricObje
     }
 
     override fun normalAtPoint(point: Point3D): Vector3D {
-        val toCenter = (point.toVector3D() - center).normalize().round()
-
-        return toCenter
+        val toCenter = (point.toVector3D() - center)
+        val bias = 1.0001f
+        val n =
+            Vector3D(
+                (bias * toCenter.x / abs(dx)).toInt().toFloat(),
+                (bias * toCenter.y / abs(dy)).toInt().toFloat(),
+                (bias * toCenter.z / abs(dz)).toInt().toFloat()
+            )
+        return n.normalize()
     }
 
     override fun translate(dir: Vector3D): GeometricObject {

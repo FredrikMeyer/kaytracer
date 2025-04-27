@@ -3,6 +3,16 @@ package net.fredrikmeyer.geometry
 import net.fredrikmeyer.linalg.Matrix3x3
 
 data class Point3D(val x: Float, val y: Float, val z: Float) {
+    init {
+        if (x.isNaN() || y.isNaN() || z.isNaN()) {
+            throw IllegalArgumentException("Point3D cannot contain NaN values")
+        }
+
+    }
+
+    constructor(x: Double, y: Double, z: Double) : this(x.toFloat(), y.toFloat(), z.toFloat())
+    constructor(x: Int, y: Int, z: Int) : this(x.toFloat(), y.toFloat(), z.toFloat())
+
     private val vector = Vector3D(x, y, z)
 
     fun toVector3D(): Vector3D {

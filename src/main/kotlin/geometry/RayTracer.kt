@@ -5,17 +5,24 @@ import java.lang.Math.random
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.pow
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+
+data class RayTracerConfig(
+    val width: Int = 700,
+    val height: Int = 700,
+    val maxRecursionDepth: Int = 3,
+    val antiAliasMaxLevel: Int = 3
+)
 
 @OptIn(ExperimentalTime::class)
 class RayTracer(
-    private val width: Int,
-    private val height: Int,
     private val scene: Scene,
-    private val maxRecursionDepth: Int = 3,
-    private val antiAliasMaxLevel: Int = 3
+    private val config: RayTracerConfig,
+    val camera: Camera
 ) {
+    private val width = config.width
+    private val height = config.height
+
     fun doRayTracing(setPixelsCallback: (Map<Pair<Int, Int>, Color>) -> Unit) {
 //        val currentInstant = Clock.System.now()
         val chunkLength = width / 4
@@ -29,13 +36,20 @@ class RayTracer(
                 var c = Color.BLACK
                 for (x in chunk) {
                     for (y in 0..<height) {
-                        val level = antiAliasMaxLevel
+                        val level = config.antiAliasMaxLevel
                         for (p in 0..<level) {
                             for (q in 0..<level) {
                                 val jitteredX = (x + (p + random()) / level).toFloat()
                                 val jitteredY = (y + (q + random()) / level).toFloat()
 
-                                c += getColorAtPixel(jitteredX, jitteredY)
+                                val (u, v) = pixelToUV(
+                                    jitteredX,
+                                    jitteredY,
+                                    ImagePlane(-0.5f, 0.5f, -0.5f, 0.5f)
+                                )
+                                c += getColorAtPixel(
+                                    u, v, camera
+                                )
                             }
                         }
                         c = (1f / (level * level)) * c
@@ -66,7 +80,7 @@ class RayTracer(
         interval: Interval = Interval(0f, Float.POSITIVE_INFINITY),
         recursionDepth: Int = 0,
     ): Color {
-        if (recursionDepth >= maxRecursionDepth) {
+        if (recursionDepth >= config.maxRecursionDepth) {
             return accumulatedColor
         }
 
@@ -134,45 +148,22 @@ class RayTracer(
         j: Float,
         imagePlane: ImagePlane,
     ): Pair<Float, Float> {
-        val (l, r, b, t) = imagePlane
-        val width = r - l
-        val height = t - b
-        val u = l + width * (i + 0.5f) / this.width
-        val v = b + height * (j + 0.5f) / this.height
+        val width = imagePlane.width()
+        val height = imagePlane.height()
+        val u = imagePlane.left + width * (i + 0.5f) / this.width
+        val v = imagePlane.bottom + height * (j + 0.5f) / this.height
         return Pair(u, v)
     }
 
     private fun getColorAtPixel(
-        x: Float,
-        y: Float,
+        u: Float,
+        v: Float,
+        camera: Camera,
     ): Color {
-        val uvCoordinates = pixelToUV(
-            x,
-            y,
-            ImagePlane(-0.5f, 0.5f, -0.5f, 0.5f)
-        )
-        val ray = rayAtPoint(uvCoordinates.first, uvCoordinates.second)
+        val ray = camera.ray(Pair(u, v))
         val color = colorOfRay(
             ray = ray
         )
         return color
     }
-
-    private fun rayAtPoint(u: Float, v: Float): Ray {
-        val uu = Vector3D(1f, 0f, 0f)
-        val vv = Vector3D(0f, 1f, 0f)
-        val w = Vector3D(0f, 0f, 1f)
-
-        val e = Point3D(0f, 0f, currentCameraZ)
-
-        val d = 1f
-        val pointInImagePlane = u * uu + v * vv
-
-        val ray = Ray(
-            origin = e,
-            direction = (-d * w + pointInImagePlane).normalize()
-        )
-        return ray
-    }
-
 }

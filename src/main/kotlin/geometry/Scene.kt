@@ -26,6 +26,7 @@ class Scene(
     )
 ) {
 
+
     fun updateLightPosition(lightPosition: Point3D) {
         this.lightSources = listOf(lightSources.first().copy(position = lightPosition))
     }
@@ -70,6 +71,10 @@ class Scene(
 
     fun numberOfSurfaces(): Int {
         return objects.size
+    }
+
+    override fun toString(): String {
+        return "Scene(ambientLightIntensity=$ambientLightIntensity, objects=$objects, lightSources=$lightSources)"
     }
 }
 
@@ -169,6 +174,9 @@ class SurfaceBuilder {
         return object : Surface {
             override val geometry: GeometricObject = this@SurfaceBuilder.geometry!!
             override val material: Material = this@SurfaceBuilder.material!!
+            override fun toString(): String {
+                return "Surface(geometry=$geometry, material=$material)"
+            }
         }
     }
 }

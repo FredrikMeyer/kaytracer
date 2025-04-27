@@ -8,6 +8,7 @@ import net.fredrikmeyer.geometry.times
 data class Ray(val origin: Point3D, val direction: Vector3D) {
 
     fun pointOnRay(t: Float): Point3D {
+        require(!t.isNaN())
         return (origin.toVector3D() + (t * direction)).toPoint3D()
     }
 

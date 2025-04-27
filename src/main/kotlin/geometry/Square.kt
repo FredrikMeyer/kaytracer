@@ -95,4 +95,4 @@ data class Square(val center: Point3D, val normal: Vector3D, val size: Float) : 
 }
 
 // Helper function to get absolute value
-private fun abs(value: Float): Float = if (value < 0) -value else value
+fun abs(value: Float): Float = if (value < 0) -value else value
