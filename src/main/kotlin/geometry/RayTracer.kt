@@ -1,9 +1,5 @@
 package net.fredrikmeyer.geometry
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
 import net.fredrikmeyer.*
 import java.lang.Math.random
 import kotlin.math.PI
@@ -18,19 +14,21 @@ class RayTracer(
     private val height: Int,
     private val scene: Scene,
     private val maxRecursionDepth: Int = 3,
-    private val antiAliasMaxLevel: Int = 10
+    private val antiAliasMaxLevel: Int = 3
 ) {
-    fun doRayTracing(): Map<Pair<Int, Int>, Color> = runBlocking {
-        val currentInstant = Clock.System.now()
+    fun doRayTracing(setPixelsCallback: (Map<Pair<Int, Int>, Color>) -> Unit) {
+//        val currentInstant = Clock.System.now()
         val chunkLength = width / 4
         println("Available processors: ${Runtime.getRuntime().availableProcessors()}")
-        val pixels = Array(height) { Array(width) { Color.BLACK } }
 
-        val jobs = (0..<width).chunked(chunkLength).map { chunk ->
-            async(Dispatchers.Default) {
+        val jobs = (0..<width).chunked(chunkLength)
+            .parallelStream().forEach { chunk ->
+//                println("Processing chunk of size ${chunk.size} at ${Clock.System.now() - currentInstant}")
+                val pixels = Array(height) { Array(width) { Color.BLACK } }
+                //            async(Dispatchers.Default) {
+                var c = Color.BLACK
                 for (x in chunk) {
                     for (y in 0..<height) {
-                        var c = Color.BLACK
                         val level = antiAliasMaxLevel
                         for (p in 0..<level) {
                             for (q in 0..<level) {
@@ -44,23 +42,22 @@ class RayTracer(
                         pixels[y][x] = c
                     }
                 }
-                println("Completed chunk of size ${chunk.size} in time  ${Clock.System.now() - currentInstant}.")
+                val m = mutableMapOf<Pair<Int, Int>, Color>()
+                for (x in chunk) {
+                    for (y in 0..<height) {
+                        m[Pair(x, y)] = pixels[y][x]
+                    }
+                }
+                setPixelsCallback(m)
+//                println("Completed chunk of size ${chunk.size} in time  ${Clock.System.now() - currentInstant}.")
+                //            }
             }
-        }
-        jobs.awaitAll()
+        //        jobs.awaitAll()
 
-        val res = mutableMapOf<Pair<Int, Int>, Color>()
+//        val duration = Clock.System.now() - currentInstant
+//        println("Done drawing pixels. Took: $duration")
 
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                res[Pair(x, y)] = pixels[y][x]
-            }
-        }
 
-        val duration = Clock.System.now() - currentInstant
-        println("Done drawing pixels. Took: $duration")
-
-        res
     }
 
     private tailrec fun colorOfRay(
@@ -108,7 +105,8 @@ class RayTracer(
             val vv = -1f * ray.direction
             val h = (vv + lightDir).normalize()
             val ks = material.specularCoefficient
-            val phong = max(0.0, (normal dot h).toDouble()).pow(100.0).toFloat() * ks
+            val phong =
+                max(0.0, (normal dot h).toDouble()).pow(material.phongCoefficient).toFloat() * ks
 
             I * (lambertian + phong)
         } else {

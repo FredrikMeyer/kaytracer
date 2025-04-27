@@ -214,8 +214,9 @@ class MaterialBuilder {
     var color: Color = Color.WHITE
     var reflectivity: Float = 0.3f
     var specularCoefficient: Color = Color.GRAY_LIGHT
+    var phongCoefficient: Double = 100.0
 
     fun build(): Material {
-        return Material(color, specularCoefficient, reflectivity)
+        return Material(color, specularCoefficient, phongCoefficient, reflectivity)
     }
 }

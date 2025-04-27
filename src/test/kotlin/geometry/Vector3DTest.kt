@@ -1,12 +1,8 @@
 package geometry
 
 import net.fredrikmeyer.geometry.Vector3D
-import net.fredrikmeyer.geometry.minus
-import net.fredrikmeyer.geometry.norm
-import net.fredrikmeyer.geometry.times
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import java.util.function.Consumer
 

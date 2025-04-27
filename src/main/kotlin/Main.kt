@@ -9,6 +9,7 @@ import kotlin.math.sin
 // Variable to store the current camera Z position
 var currentCameraZ = 3.0f
 
+
 val scenes = mapOf(
     "1" to scene {
         ambientLightIntensity = 2f
@@ -82,7 +83,7 @@ val scenes = mapOf(
             position = Point3D(1.5f, 1.5f, 1.5f)
             intensity = 2f
         }
-        lightSource { position = Point3D(-1f, -0.5f, 0f) }
+        lightSource { position(-1f, -0.5f, 0f) }
         surface {
             plane {
                 point = Point3D(0.0f, -1f, 0.0f)
@@ -141,7 +142,7 @@ fun main() {
         width = width,
         height = height,
         scene = scene,
-        antiAliasMaxLevel = 10,
+        antiAliasMaxLevel = 2,
         maxRecursionDepth = 30
     )
 
@@ -152,8 +153,10 @@ fun main() {
         if (elapsedTime >= targetFrameTime) {
             val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
             scene.updateLightPosition(lightPos)
-            val colors = rayTracer.doRayTracing()
-            bbs.setPixels(colors)
+            rayTracer.doRayTracing({
+                bbs.setPixels(it)
+                viewer.refresh()
+            })
             viewer.refresh()
             lastFrameTime = currentTime
             angle += 0.05

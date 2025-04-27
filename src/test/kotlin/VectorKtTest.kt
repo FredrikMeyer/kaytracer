@@ -1,6 +1,5 @@
 import net.fredrikmeyer.geometry.Vector3D
-import net.fredrikmeyer.geometry.dot
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class VectorKtTest {
