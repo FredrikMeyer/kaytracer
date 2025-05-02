@@ -31,10 +31,6 @@ class Scene(
         this.lightSources = listOf(lightSources.first().copy(position = lightPosition))
     }
 
-    fun getLightSource(): LightSource {
-        return lightSources.first()
-    }
-
     fun getLightSources(): List<LightSource> {
         return lightSources
     }

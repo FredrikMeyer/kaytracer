@@ -98,34 +98,39 @@ class RayTracer(
         var color = scene.ambientLightIntensity * materialColor
 
         val normal = hit.surface.geometry.normalAtPoint(hitPoint)
-        val lightSource = scene.getLightSource()
-        val lightPos = lightSource.position
-        val lightDirectionVector = lightPos.toVector3D() - hitPoint.toVector3D()
-        val lightDir = lightDirectionVector.normalize()
+        val lightSources = scene.getLightSources()
 
-        val rayFromHitToLight = Ray(hitPoint, lightDir)
 
-        // Compute if the ray from the hit point to the light source intersects with any object
-        val shadowIntersection =
-            scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
+        lightSources.forEach { lightSource ->
+            val lightPos = lightSource.position
+            val lightDirectionVector = lightPos.toVector3D() - hitPoint.toVector3D()
+            val lightDir = lightDirectionVector.normalize()
 
-        color = color + if (shadowIntersection == null) {
-            val distanceToLight = lightDirectionVector.normSquared()
-            // Scale intensity with inverse square law
-            val I = (lightSource.intensity / (4 * PI * distanceToLight)).toFloat()
-            val kd = materialColor
-            val lambertian = max(0f, normal dot lightDir) * kd
+            val rayFromHitToLight = Ray(hitPoint, lightDir)
 
-            val vv = -1f * ray.direction
-            val h = (vv + lightDir).normalize()
-            val ks = material.specularCoefficient
-            val phong =
-                max(0.0, (normal dot h).toDouble()).pow(material.phongCoefficient).toFloat() * ks
+            // Compute if the ray from the hit point to the light source intersects with any object
+            val shadowIntersection =
+                scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
 
-            I * (lambertian + phong)
-        } else {
-            Color.BLACK
+            color = color + if (shadowIntersection == null) {
+                val distanceToLight = lightDirectionVector.normSquared()
+                // Scale intensity with inverse square law
+                val I = (lightSource.intensity / (4 * PI * distanceToLight)).toFloat()
+                val kd = materialColor
+                val lambertian = max(0f, normal dot lightDir) * kd
+
+                val vv = -1f * ray.direction
+                val h = (vv + lightDir).normalize()
+                val ks = material.specularCoefficient
+                val phong =
+                    max(0.0, (normal dot h).toDouble()).pow(material.phongCoefficient).toFloat() * ks
+
+                I * (lambertian + phong)
+            } else {
+                Color.BLACK
+            }
         }
+
         val reflectionVector = createReflectionVector(ray, normal)
         val newRay = Ray(hitPoint, reflectionVector)
         val reflectivity = material.reflectivity

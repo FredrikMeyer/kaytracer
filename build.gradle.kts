@@ -17,7 +17,7 @@ application {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-
+    implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.20")
     testImplementation(kotlin("test"))
     testImplementation(platform("org.junit:junit-bom:5.12.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")

@@ -85,21 +85,17 @@ val scenes = mapOf(
     },
     "2" to scene {
         ambientLightIntensity = 0.2f
-//        lightSource {
-//            position = Point3D(1.5f, 1.5f, 1.5f)
-//            intensity = 0.2f
-//        }
         lightSource {
             position(0f, 3.0f, 0f)
-            intensity = 100000f
+            intensity = 1000f
         }
         lightSource {
             position(0f, -3.0f, 0f)
-            intensity = 100000f
+            intensity = 1000f
         }
         lightSource {
             position(1.5f, 0.5f, 0.5f)
-            intensity = 1000000000f
+            intensity = 1000f
         }
 //        surface {
 //            plane {
@@ -122,7 +118,13 @@ val scenes = mapOf(
             }
         }
         surface {
-            geometry = Cube(Point3D(0.0f, -1f, -1.0f), Point3D(1.0f, 0.0f, 0.0f))
+            geometry = Cube(Point3D(0.0f, -1f, -1.0f), Point3D(1.0f, 0.0f, 0.0f)).translate(
+                Vector3D(
+                    0.0f,
+                    0.0f,
+                    -0.5f
+                )
+            )
             material {
                 color = Color.GREEN
                 reflectivity = 0.5f

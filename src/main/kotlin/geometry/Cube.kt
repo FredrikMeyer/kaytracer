@@ -8,6 +8,7 @@ import java.lang.Math.random
  * An axis-aligned cube, defined by [cornerNear] and [cornerFar].
  *
  * TODO: Maybe implement [this](https://www.google.com/search?q=An+Efficient+and+Robust+Ray%E2%80%93Box+Intersection+Algorithm+by+Amy+Williams+et+al.%2C+2004.&oq=An+Efficient+and+Robust+Ray%E2%80%93Box+Intersection+Algorithm+by+Amy+Williams+et+al.%2C+2004.&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIHCAEQIRiPAjIHCAIQIRiPAjIHCAMQIRiPAtIBBzE0N2owajeoAgCwAgA&sourceid=chrome&ie=UTF-8)
+ * https://blog.johnnovak.net/2016/10/22/the-nim-ray-tracer-project-part-4-calculating-box-normals/
  */
 data class Cube(val cornerNear: Point3D, val cornerFar: Point3D) : GeometricObject {
     init {

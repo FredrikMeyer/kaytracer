@@ -5,11 +5,6 @@ import kotlin.math.pow
 import java.awt.Color as AwtColor
 
 data class Color(val r: Float, val g: Float, val b: Float) {
-    init {
-//        require(r in 0.0..1.0) { "r must be between 0.0 and 1.0. Actual value: $r" }
-//        require(g in 0.0..1.0) { "g must be between 0.0 and 1.0. Actual value: $g" }
-//        require(b in 0.0..1.0) { "b must be between 0.0 and 1.0. Actual value: $b" }
-    }
 
     fun clamp(): Color {
         return Color(r.coerceIn(0.0f, 1.0f), g.coerceIn(0.0f, 1.0f), b.coerceIn(0.0f, 1.0f))
@@ -30,6 +25,20 @@ data class Color(val r: Float, val g: Float, val b: Float) {
         val CYAN = Color(0.0f, 1.0f, 1.0f)
         val MAGENTA = Color(1.0f, 0.0f, 1.0f)
         val BLACK = Color(0.0f, 0.0f, 0.0f)
+
+        fun allColors(): List<Color> {
+            return Color.Companion::class.members
+                .filter { it.returnType.toString() == "net.fredrikmeyer.Color" }
+                .mapNotNull { member ->
+                    try {
+                        member.call(this) as? Color
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+        }
+
+
     }
 }
 
