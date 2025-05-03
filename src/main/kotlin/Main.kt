@@ -15,12 +15,33 @@ val config = RayTracerConfig(
 
 class State(var currentCameraZ: Float = 3.0f)
 
-val scenes = mapOf(
-    "1" to scene {
-        ambientLightIntensity = 2f
+object Scenes {
+    val simple = scene {
+        ambientLightIntensity = 0.1f
         lightSource {
-            position = Point3D(1.5f, 1.5f, 1.5f)
+            position = Point3D(2.5f, 2f, 0f)
             intensity = 100f
+        }
+        surface {
+            sphere {
+                radius = 1f
+                center = Point3D(0.5f, 0f, 0f)
+            }
+            material {
+                color = Color.RED
+                reflectivity = 0.0f
+            }
+        }
+    }
+    val spheres = scene {
+        ambientLightIntensity = 0.2f
+        lightSource {
+            position = Point3D(0.5f, 3f, 0f)
+            intensity = 1000f
+        }
+        lightSource {
+            position = Point3D(2.5f, 3f, 0f)
+            intensity = 1000f
         }
         surface {
             sphere {
@@ -81,8 +102,8 @@ val scenes = mapOf(
                 reflectivity = 0.7f
             }
         }
-    },
-    "2" to scene {
+    }
+    val cube = scene {
         ambientLightIntensity = 0.2f
         lightSource {
             position(0f, 3.0f, 0f)
@@ -143,53 +164,55 @@ val scenes = mapOf(
                 reflectivity = 0.3f
             }
         }
-    })
+    }
 
-val cornellBox = scene {
-    surface {
-        cube {
-            p1 = Point3D(-1f, -1f, -1f)
-            p2 = Point3D(1f, 1f, 1f)
+
+    val cornellBox = scene {
+        surface {
+            cube {
+                p1 = Point3D(-1f, -1f, -1f)
+                p2 = Point3D(1f, 1f, 1f)
+            }
+            material {
+                color = Color.WHITE
+                reflectivity = 0.0f
+            }
         }
-        material {
-            color = Color.WHITE
-            reflectivity = 0.0f
+        surface {
+            plane {
+                point = Point3D(0.0f, 0.0f, -3.0f)
+                normal = Vector3D(0.0f, 1.0f, 0.0f)
+            }
+            material {
+                color = Color.RED
+                reflectivity = 0.0f
+            }
         }
-    }
-    surface {
-        plane {
-            point = Point3D(0.0f, 0.0f, -3.0f)
-            normal = Vector3D(0.0f, 1.0f, 0.0f)
+        surface {
+            plane {
+                point = Point3D(-3f, 0.0f, 0.0f)
+                normal = Vector3D(1f, 0.0f, 0.0f)
+            }
+            material {
+                color = Color.GREEN
+                reflectivity = 0.0f
+            }
         }
-        material {
-            color = Color.RED
-            reflectivity = 0.0f
-        }
-    }
-    surface {
-        plane {
-            point = Point3D(-3f, 0.0f, 0.0f)
-            normal = Vector3D(1f, 0.0f, 0.0f)
-        }
-        material {
-            color = Color.GREEN
-            reflectivity = 0.0f
-        }
-    }
-    surface {
-        plane {
-            point = Point3D(3f, 0.0f, 0.0f)
-            normal = Vector3D(-1f, 0.0f, 0.0f)
-        }
-        material {
-            color = Color.BLUE
-            reflectivity = 0.0f
+        surface {
+            plane {
+                point = Point3D(3f, 0.0f, 0.0f)
+                normal = Vector3D(-1f, 0.0f, 0.0f)
+            }
+            material {
+                color = Color.BLUE
+                reflectivity = 0.0f
+            }
         }
     }
 }
 
 fun main() {
-    val scene = scenes["1"]!!
+    val scene = Scenes.spheres
     println(scene)
 
     // Create a bitmap with a simple pattern
@@ -233,7 +256,7 @@ fun main() {
         camera = camera,
     )
 
-    val targetFrameTime = 200 // 100ms between frames (10 FPS)
+    val targetFrameTime = 1000 // 100ms between frames (10 FPS)
     while (viewer.isVisible()) {
         val currentTime = System.currentTimeMillis()
         val elapsedTime = currentTime - lastFrameTime

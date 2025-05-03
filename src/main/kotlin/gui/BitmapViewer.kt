@@ -21,7 +21,7 @@ class BitmapViewer(
     state: State,
     minCameraZ: Float = 1.0f,
     maxCameraZ: Float = 10.0f,
-    var cameraPositionChangeListener: (BitmapViewer.(Float) -> Unit)? = null
+    val cameraPositionChangeListener: (BitmapViewer.(Float) -> Unit)? = null
 ) {
     private val frame: JFrame = JFrame(title)
     private val distanceSliderValueLabel: JLabel
@@ -167,24 +167,5 @@ class BitmapViewer(
      */
     fun isVisible(): Boolean {
         return frame.isVisible
-    }
-
-    /**
-     * Gets the current camera Z position from the slider.
-     * @return The current camera Z position.
-     */
-    fun getCurrentCameraZ(): Float {
-        return distanceSlider.value / 10.0f
-    }
-
-    /**
-     * Sets the camera Z position and updates the slider.
-     * This method is primarily for testing purposes.
-     * @param cameraZ The new camera Z position.
-     */
-    fun setCameraZ(cameraZ: Float) {
-        val sliderValue = (cameraZ * 10).toInt()
-        distanceSlider.value = sliderValue
-        // The change listener will be triggered automatically
     }
 }

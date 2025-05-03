@@ -34,17 +34,22 @@ class RayTracer(
             .parallelStream().forEach { chunk ->
 //                println("Processing chunk of size ${chunk.size} at ${Clock.System.now() - currentInstant}")
                 val pixels = Array(height) { Array(width) { Color.BLACK } }
-                //            async(Dispatchers.Default) {
-                var c = Color.BLACK
+
+                val r = ThreadLocalRandom.current()
                 for (x in chunk) {
                     for (y in 0..<height) {
+                        var c = Color.BLACK
                         val level = config.antiAliasMaxLevel
                         for (p in 0..<level) {
                             for (q in 0..<level) {
-                                val r = ThreadLocalRandom.current()
+                                val xJitter =
+                                    if (p > 0) ((p + r.nextDouble()) / level) else p.toDouble()
+                                val yJitter =
+                                    if (q > 0) (q + r.nextDouble()) / level else q.toDouble()
 
-                                val jitteredX = (x + (p + r.nextDouble()) / level).toFloat()
-                                val jitteredY = (y + (q + r.nextDouble()) / level).toFloat()
+
+                                val jitteredX = (x + xJitter).toFloat()
+                                val jitteredY = (y + yJitter).toFloat()
 
                                 val (u, v) = pixelToUV(
                                     jitteredX,
@@ -68,9 +73,7 @@ class RayTracer(
                 }
                 setPixelsCallback(m)
 //                println("Completed chunk of size ${chunk.size} in time  ${Clock.System.now() - currentInstant}.")
-                //            }
             }
-        //        jobs.awaitAll()
 
         val duration = Clock.System.now() - currentInstant
         println("Done drawing pixels. Took: $duration")
@@ -96,6 +99,7 @@ class RayTracer(
         val hitPoint = hit.point
         val material = hit.surface.material
 
+        // TODO: vil ikke ambient light bli lagt til altfor mange ganger her?
         // Ambient light
         // k_a
         val materialColor = material.color
@@ -104,27 +108,24 @@ class RayTracer(
         val normal = hit.surface.geometry.normalAtPoint(hitPoint)
         val lightSources = scene.getLightSources()
 
-
         lightSources.forEach { lightSource ->
             val lightPos = lightSource.position
             val lightDirectionVector = lightPos.toVector3D() - hitPoint.toVector3D()
-            val lightDir = lightDirectionVector.normalize()
+            val lightDir = lightDirectionVector
 
-            val rayFromHitToLight = Ray(hitPoint, lightDir)
+            val rayFromHitToLight = Ray(hitPoint,  lightDir)
 
             // Compute if the ray from the hit point to the light source intersects with any object
-            val shadowIntersection =
-                scene.hit(rayFromHitToLight, Interval(0.00001f, Float.POSITIVE_INFINITY))
-
-            color = color + if (shadowIntersection == null) {
+            color = color + if (!isInShadow(rayFromHitToLight)) {
                 val distanceToLight = lightDirectionVector.normSquared()
                 // Scale intensity with inverse square law
                 val I = (lightSource.intensity / (4 * PI * distanceToLight)).toFloat()
                 val kd = materialColor
-                val lambertian = max(0f, normal dot lightDir) * kd
+                val normalizedLightDir = lightDir.normalize()
+                val lambertian = max(0f, normal dot normalizedLightDir) * kd
 
                 val vv = -1f * ray.direction
-                val h = (vv + lightDir).normalize()
+                val h = (vv + normalizedLightDir).normalize()
                 val ks = material.specularCoefficient
                 val phong =
                     max(0.0, (normal dot h).toDouble()).pow(material.phongCoefficient)
@@ -147,6 +148,11 @@ class RayTracer(
             interval = Interval(0.0001f, Float.POSITIVE_INFINITY),
             recursionDepth + 1
         )
+    }
+
+    private fun isInShadow(ray: Ray): Boolean {
+        // TODO: doesn't need a Hit object, only true/false
+        return scene.hit(ray, Interval(0.0001f, Float.POSITIVE_INFINITY)) != null
     }
 
     private fun createReflectionVector(ray: Ray, normal: Vector3D): Vector3D {
