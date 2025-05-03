@@ -1,4 +1,5 @@
-import net.fredrikmeyer.geometry.Vector3D
+package  net.fredrikmeyer.geometry
+
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

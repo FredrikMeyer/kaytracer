@@ -1,6 +1,6 @@
-package geometry
+package net.fredrikmeyer.geometry
 
-import net.fredrikmeyer.geometry.Vector3D
+
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test

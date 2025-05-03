@@ -1,11 +1,6 @@
-import net.fredrikmeyer.Ray
+package net.fredrikmeyer
+
 //import net.fredrikmeyer.UnionOfSpheres
-import net.fredrikmeyer.geometry.Point3D
-import net.fredrikmeyer.geometry.Sphere
-import net.fredrikmeyer.geometry.Vector3D
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.data.Percentage
-import org.junit.jupiter.api.Test
 
 //class UnionOfSpheresTest {
 //    @Test

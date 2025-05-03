@@ -1,10 +1,10 @@
-package linalg
+package net.fredrikmeyer.linalg
+
 
 import net.fredrikmeyer.geometry.Vector3D
-import net.fredrikmeyer.linalg.Matrix3x3
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class Matrix3x3Test {

@@ -1,4 +1,5 @@
-import net.fredrikmeyer.*
+package net.fredrikmeyer
+
 import net.fredrikmeyer.geometry.Point3D
 import net.fredrikmeyer.geometry.Sphere
 import net.fredrikmeyer.geometry.Vector3D

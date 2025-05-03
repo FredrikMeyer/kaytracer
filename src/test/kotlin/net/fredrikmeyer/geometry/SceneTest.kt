@@ -1,11 +1,11 @@
+package net.fredrikmeyer.geometry
+
 import net.fredrikmeyer.Color
 import net.fredrikmeyer.Ray
-import net.fredrikmeyer.geometry.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertFailsWith
 
 
 /**

@@ -1,9 +1,6 @@
-package geometry
+package net.fredrikmeyer.geometry
 
 import net.fredrikmeyer.Ray
-import net.fredrikmeyer.geometry.Point3D
-import net.fredrikmeyer.geometry.Sphere
-import net.fredrikmeyer.geometry.Vector3D
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import kotlin.math.sqrt
