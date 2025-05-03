@@ -11,9 +11,14 @@ data class Color(val r: Float, val g: Float, val b: Float) {
     }
 
     fun toJavaAwt(): AwtColor {
-//        val (r,g,b) = this.clamp()
-        return AwtColor(r.gammaEncode().clamp(), g.gammaEncode().clamp(), b.gammaEncode().clamp())
+        val (r,g,b) = this.clamp()
+        return AwtColor(r.gammaEncode(), g.gammaEncode(), b.gammaEncode())
     }
+    infix operator fun plus(other: Color) =
+        Color(this.r + other.r, this.g + other.g, this.b + other.b)
+
+    infix operator fun times(other: Color) =
+        Color(this.r * other.r, this.g * other.g, this.b * other.b)
 
     companion object {
         val WHITE = Color(1.0f, 1.0f, 1.0f)
@@ -26,9 +31,10 @@ data class Color(val r: Float, val g: Float, val b: Float) {
         val MAGENTA = Color(1.0f, 0.0f, 1.0f)
         val BLACK = Color(0.0f, 0.0f, 0.0f)
 
+        @Suppress("unused")
         fun allColors(): List<Color> {
-            return Color.Companion::class.members
-                .filter { it.returnType.toString() == "net.fredrikmeyer.Color" }
+            return Companion::class.members
+                .filter { it.returnType == net.fredrikmeyer.Color::class }
                 .mapNotNull { member ->
                     try {
                         member.call(this) as? Color
@@ -41,6 +47,10 @@ data class Color(val r: Float, val g: Float, val b: Float) {
 
     }
 }
+
+infix operator fun Float.times(other: Color) =
+    Color(min(this * other.r, 1.0f), min(this * other.g, 1.0f), min(this * other.b, 1.0f))
+
 
 private const val GAMMA = 2f
 
@@ -55,12 +65,3 @@ private fun Float.gammaDecode(): Float {
 private fun Float.clamp(): Float {
     return this.coerceIn(0.0f, 1.0f)
 }
-
-infix operator fun Float.times(other: Color) =
-    Color(min(this * other.r, 1.0f), min(this * other.g, 1.0f), min(this * other.b, 1.0f))
-
-infix operator fun Color.plus(other: Color) =
-    Color(this.r + other.r, this.g + other.g, this.b + other.b)
-
-infix operator fun Color.times(other: Color) =
-    Color(this.r * other.r, this.g * other.g, this.b * other.b)
