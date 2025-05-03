@@ -24,6 +24,9 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.27.2")
     testImplementation("org.assertj:assertj-swing-junit:3.17.1")
+    constraints {
+        testImplementation("org.junit:junit:5.12.1")
+    }
 }
 
 tasks.test {
