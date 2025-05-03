@@ -25,7 +25,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.27.2")
     testImplementation("org.assertj:assertj-swing-junit:3.17.1")
     constraints {
-        testImplementation("org.junit:junit:5.12.1")
+        testImplementation("junit:junit:4.13.1")
     }
 }
 
