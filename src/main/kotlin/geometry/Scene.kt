@@ -173,13 +173,10 @@ class SurfaceBuilder {
     fun toSurface(): Surface {
         require(geometry != null && material != null) { "Geometry: $geometry, Material: $material" }
 
-        return object : Surface {
-            override val geometry: GeometricObject = this@SurfaceBuilder.geometry!!
-            override val material: Material = this@SurfaceBuilder.material!!
-            override fun toString(): String {
-                return "Surface(geometry=$geometry, material=$material)"
-            }
-        }
+        return Surface(
+            this@SurfaceBuilder.geometry!!,
+            this@SurfaceBuilder.material!!
+        )
     }
 }
 

@@ -201,7 +201,7 @@ fun main() {
     // Display the bitmap using our new BitmapViewer class with camera position slider
     val viewer = BitmapViewer(
         bitmapStorage = bbs,
-        title = "Ray Tracer - Adjust Camera Position",
+        title = "Ray Tracer",
         minCameraZ = 1.0f,
         maxCameraZ = 10.0f,
         state = state,
