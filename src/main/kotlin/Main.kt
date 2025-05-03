@@ -6,15 +6,14 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
-// Variable to store the current camera Z position
-var currentCameraZ = 3.0f
-
 val config = RayTracerConfig(
     width = 700,
     height = 700,
     antiAliasMaxLevel = 2,
     maxRecursionDepth = 30
 )
+
+class State(var currentCameraZ: Float = 3.0f)
 
 val scenes = mapOf(
     "1" to scene {
@@ -146,8 +145,51 @@ val scenes = mapOf(
         }
     })
 
+val cornellBox = scene {
+    surface {
+        cube {
+            p1 = Point3D(-1f, -1f, -1f)
+            p2 = Point3D(1f, 1f, 1f)
+        }
+        material {
+            color = Color.WHITE
+            reflectivity = 0.0f
+        }
+    }
+    surface {
+        plane {
+            point = Point3D(0.0f, 0.0f, -3.0f)
+            normal = Vector3D(0.0f, 1.0f, 0.0f)
+        }
+        material {
+            color = Color.RED
+            reflectivity = 0.0f
+        }
+    }
+    surface {
+        plane {
+            point = Point3D(-3f, 0.0f, 0.0f)
+            normal = Vector3D(1f, 0.0f, 0.0f)
+        }
+        material {
+            color = Color.GREEN
+            reflectivity = 0.0f
+        }
+    }
+    surface {
+        plane {
+            point = Point3D(3f, 0.0f, 0.0f)
+            normal = Vector3D(-1f, 0.0f, 0.0f)
+        }
+        material {
+            color = Color.BLUE
+            reflectivity = 0.0f
+        }
+    }
+}
+
 fun main() {
-    val scene = scenes["2"]!!
+    val scene = scenes["1"]!!
     println(scene)
 
     // Create a bitmap with a simple pattern
@@ -155,20 +197,19 @@ fun main() {
     val height = 700
     val bbs = BasicBitmapStorage(width, height)
 
+    val state = State()
     // Display the bitmap using our new BitmapViewer class with camera position slider
     val viewer = BitmapViewer(
         bitmapStorage = bbs,
         title = "Ray Tracer - Adjust Camera Position",
-        initialCameraZ = currentCameraZ,
         minCameraZ = 1.0f,
-        maxCameraZ = 10.0f
+        maxCameraZ = 10.0f,
+        state = state,
+        cameraPositionChangeListener = { newCameraZ ->
+            state.currentCameraZ = newCameraZ
+            this.refresh()
+        }
     )
-
-    // Set up the camera position change listener
-    viewer.setCameraPositionChangeListener { newCameraZ ->
-        currentCameraZ = newCameraZ
-        viewer.refresh()
-    }
 
     viewer.show()
 
@@ -180,7 +221,6 @@ fun main() {
 
     var angle = Math.PI / 2
     var lastFrameTime = System.currentTimeMillis()
-    val targetFrameTime = 1000 // 100ms between frames (10 FPS)
 
     val camera = Camera(
         seeFrom = Point3D(0.5f, 0f, 10f),
@@ -193,16 +233,17 @@ fun main() {
         camera = camera,
     )
 
+    val targetFrameTime = 200 // 100ms between frames (10 FPS)
     while (viewer.isVisible()) {
         val currentTime = System.currentTimeMillis()
         val elapsedTime = currentTime - lastFrameTime
 
         if (elapsedTime >= targetFrameTime) {
             val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
-//            scene.updateLightPosition(lightPos)
+            scene.updateLightPosition(lightPos)
             camera.seeFrom = Point3D(
-                x = 0.5 + currentCameraZ * cos(angle),
-                z = currentCameraZ * sin(angle),
+                x = 0.5 + state.currentCameraZ * cos(angle),
+                z = state.currentCameraZ * sin(angle),
                 y = 0.0
             )
             rayTracer.doRayTracing({
@@ -211,7 +252,7 @@ fun main() {
             })
             viewer.refresh()
             lastFrameTime = currentTime
-            angle += 0.5
+            angle += 0.1
         } else {
             // Short sleep to avoid busy-waiting
             Thread.sleep(10)

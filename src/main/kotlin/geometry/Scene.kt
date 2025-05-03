@@ -164,6 +164,12 @@ class SurfaceBuilder {
         geometry = builder.build()
     }
 
+    fun cube(init: CubeBuilder.() -> Unit) {
+        val builder = CubeBuilder()
+        builder.init()
+        geometry = builder.build()
+    }
+
     fun toSurface(): Surface {
         require(geometry != null && material != null) { "Geometry: $geometry, Material: $material" }
 
@@ -174,6 +180,16 @@ class SurfaceBuilder {
                 return "Surface(geometry=$geometry, material=$material)"
             }
         }
+    }
+}
+
+@RayTracerDsl
+class CubeBuilder {
+    var p1: Point3D = Point3D(0f, 0f, 0f)
+    var p2: Point3D = Point3D(1f, 1f, 1f)
+
+    fun build(): Cube {
+        return Cube(p1, p2)
     }
 }
 

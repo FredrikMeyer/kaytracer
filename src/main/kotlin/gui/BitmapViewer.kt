@@ -1,17 +1,15 @@
 package net.fredrikmeyer.gui
 
 import net.fredrikmeyer.BasicBitmapStorage
+import net.fredrikmeyer.State
 import java.awt.BorderLayout
 import java.awt.Dimension
 import java.awt.Graphics
 import java.awt.KeyboardFocusManager
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
-import javax.swing.JFrame
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JSlider
-import javax.swing.SwingUtilities
+import javax.swing.*
+import javax.swing.event.ChangeEvent
 
 /**
  * A class for displaying the bitmap stored in BasicBitmapStorage.
@@ -20,14 +18,36 @@ import javax.swing.SwingUtilities
 class BitmapViewer(
     private val bitmapStorage: BasicBitmapStorage,
     title: String = "Ray Tracer",
-    private var initialCameraZ: Float = 3.0f,
-    private var minCameraZ: Float = 1.0f,
-    private var maxCameraZ: Float = 10.0f
+    state: State,
+    minCameraZ: Float = 1.0f,
+    maxCameraZ: Float = 10.0f,
+    var cameraPositionChangeListener: (BitmapViewer.(Float) -> Unit)? = null
 ) {
     private val frame: JFrame = JFrame(title)
-    private var cameraPositionChangeListener: ((Float) -> Unit)? = null
-    private val distanceSlider: JSlider
     private val distanceSliderValueLabel: JLabel
+
+    private val distanceSlider = DistanceSlider(
+        (minCameraZ * 10).toInt(),
+        (maxCameraZ * 10).toInt(),
+        (state.currentCameraZ * 10).toInt()
+    )
+
+     class DistanceSlider(
+        min: Int,
+        max: Int,
+        initial: Int
+    ) : JSlider(HORIZONTAL, min, max, initial) {
+        init {
+            majorTickSpacing = 10
+            minorTickSpacing = 1
+            paintTicks = true
+            paintLabels = true
+        }
+
+        fun addChangeListener(function: (ChangeEvent) -> Unit) {
+            super.addChangeListener(function)
+        }
+    }
 
     init {
         // Create a panel that displays the image
@@ -53,19 +73,17 @@ class BitmapViewer(
             }
         })
 
-        // Create a slider for camera position
-        distanceSlider = jSlider()
 
-
-        distanceSliderValueLabel = JLabel("Camera Z: $initialCameraZ")
+        distanceSliderValueLabel = JLabel("Camera Z: ${state.currentCameraZ}")
 
         distanceSlider.addChangeListener { e ->
             val value = (distanceSlider.value / 10.0f)
             distanceSliderValueLabel.text = "Camera Z: $value"
-            cameraPositionChangeListener?.invoke(value)
+            this@BitmapViewer.cameraPositionChangeListener?.invoke(this@BitmapViewer, value)
         }
 
-        // Create control panel
+
+        // Create the control panel
         val controlPanel = JPanel()
         controlPanel.add(JLabel("Camera Distance:"))
         controlPanel.add(distanceSlider)
@@ -99,7 +117,7 @@ class BitmapViewer(
         })
         frame.contentPane.isFocusable = true
 
-        // Add a global key event dispatcher to handle ESC key regardless of focus
+        // Add a global key event dispatcher to handle the ESC key regardless of focus
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher { e ->
             if (e.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_ESCAPE) {
                 close()
@@ -108,21 +126,6 @@ class BitmapViewer(
                 false // Event not handled
             }
         }
-    }
-
-    private fun jSlider(): JSlider {
-        val slider = JSlider(
-            JSlider.HORIZONTAL,
-            (minCameraZ * 10).toInt(),
-            (maxCameraZ * 10).toInt(),
-            (initialCameraZ * 10).toInt()
-
-        )
-        slider.majorTickSpacing = 10
-        slider.minorTickSpacing = 1
-        slider.paintTicks = true
-        slider.paintLabels = true
-        return slider
     }
 
     /**
@@ -164,16 +167,6 @@ class BitmapViewer(
      */
     fun isVisible(): Boolean {
         return frame.isVisible
-    }
-
-    /**
-     * Sets a listener that will be called when the camera position slider is adjusted.
-     * @param listener A function that takes a Float parameter representing the new camera Z position.
-     */
-    fun setCameraPositionChangeListener(listener: (Float) -> Unit) {
-        cameraPositionChangeListener = listener
-        // Call the listener with the initial value
-        listener(initialCameraZ)
     }
 
     /**

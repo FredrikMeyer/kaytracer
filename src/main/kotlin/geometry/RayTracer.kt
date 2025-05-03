@@ -1,10 +1,11 @@
 package net.fredrikmeyer.geometry
 
 import net.fredrikmeyer.*
-import java.lang.Math.random
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.pow
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 data class RayTracerConfig(
@@ -24,9 +25,10 @@ class RayTracer(
     private val height = config.height
 
     fun doRayTracing(setPixelsCallback: (Map<Pair<Int, Int>, Color>) -> Unit) {
-//        val currentInstant = Clock.System.now()
-        val chunkLength = width / 4
+        val currentInstant = Clock.System.now()
+        val chunkLength = width / Runtime.getRuntime().availableProcessors()
         println("Available processors: ${Runtime.getRuntime().availableProcessors()}")
+
 
         val jobs = (0..<width).chunked(chunkLength)
             .parallelStream().forEach { chunk ->
@@ -39,8 +41,10 @@ class RayTracer(
                         val level = config.antiAliasMaxLevel
                         for (p in 0..<level) {
                             for (q in 0..<level) {
-                                val jitteredX = (x + (p + random()) / level).toFloat()
-                                val jitteredY = (y + (q + random()) / level).toFloat()
+                                val r = ThreadLocalRandom.current()
+
+                                val jitteredX = (x + (p + r.nextDouble()) / level).toFloat()
+                                val jitteredY = (y + (q + r.nextDouble()) / level).toFloat()
 
                                 val (u, v) = pixelToUV(
                                     jitteredX,
@@ -68,8 +72,8 @@ class RayTracer(
             }
         //        jobs.awaitAll()
 
-//        val duration = Clock.System.now() - currentInstant
-//        println("Done drawing pixels. Took: $duration")
+        val duration = Clock.System.now() - currentInstant
+        println("Done drawing pixels. Took: $duration")
 
 
     }
@@ -123,7 +127,8 @@ class RayTracer(
                 val h = (vv + lightDir).normalize()
                 val ks = material.specularCoefficient
                 val phong =
-                    max(0.0, (normal dot h).toDouble()).pow(material.phongCoefficient).toFloat() * ks
+                    max(0.0, (normal dot h).toDouble()).pow(material.phongCoefficient)
+                        .toFloat() * ks
 
                 I * (lambertian + phong)
             } else {
