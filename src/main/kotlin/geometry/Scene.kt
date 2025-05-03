@@ -27,7 +27,7 @@ class Scene(
 ) {
 
     fun updateLightPosition(lightPosition: Point3D) {
-        this.lightSources = listOf(lightSources.first().copy(position = lightPosition))
+        this.lightSources = listOf(lightSources.first().copy(position = lightPosition)) + lightSources.drop(1)
     }
 
     fun getLightSources(): List<LightSource> {

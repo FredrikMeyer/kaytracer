@@ -7,8 +7,8 @@ import kotlin.math.sin
 
 
 val config = RayTracerConfig(
-    width = 700,
-    height = 700,
+    width = 500,
+    height = 500,
     antiAliasMaxLevel = 2,
     maxRecursionDepth = 30
 )
@@ -50,7 +50,8 @@ object Scenes {
             }
             material {
                 color = Color.RED
-                reflectivity = 0.6f
+                reflectivity = 0.0f
+                specularCoefficient = Color.WHITE
             }
         }
         surface {
@@ -99,7 +100,7 @@ object Scenes {
             geometry = Plane(point = Point3D(0.0f, -1f, 0f), normal = Vector3D(0f, 1f, 0.0f))
             material {
                 color = Color.GREEN
-                reflectivity = 0.7f
+                reflectivity = 0.3f
             }
         }
     }
@@ -216,9 +217,7 @@ fun main() {
     println(scene)
 
     // Create a bitmap with a simple pattern
-    val width = 700
-    val height = 700
-    val bbs = BasicBitmapStorage(width, height)
+    val bbs = BasicBitmapStorage(config.width, config.height)
 
     val state = State()
     // Display the bitmap using our new BitmapViewer class with camera position slider
@@ -256,7 +255,7 @@ fun main() {
         camera = camera,
     )
 
-    val targetFrameTime = 1000 // 100ms between frames (10 FPS)
+    val targetFrameTime = 100 // 100ms between frames (10 FPS)
     while (viewer.isVisible()) {
         val currentTime = System.currentTimeMillis()
         val elapsedTime = currentTime - lastFrameTime
@@ -275,7 +274,7 @@ fun main() {
             })
             viewer.refresh()
             lastFrameTime = currentTime
-            angle += 0.1
+            angle += 0.05
         } else {
             // Short sleep to avoid busy-waiting
             Thread.sleep(10)

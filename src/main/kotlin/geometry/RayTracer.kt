@@ -6,7 +6,7 @@ import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+//import kotlin.time.ExperimentalTime
 
 data class RayTracerConfig(
     val width: Int = 700,
@@ -15,7 +15,7 @@ data class RayTracerConfig(
     val antiAliasMaxLevel: Int = 3
 )
 
-@OptIn(ExperimentalTime::class)
+//@OptIn(ExperimentalTime::class)
 class RayTracer(
     private val scene: Scene,
     private val config: RayTracerConfig,
@@ -25,7 +25,7 @@ class RayTracer(
     private val height = config.height
 
     fun doRayTracing(setPixelsCallback: (Map<Pair<Int, Int>, Color>) -> Unit) {
-        val currentInstant = Clock.System.now()
+//        val currentInstant = Clock.System.now()
         val chunkLength = width / Runtime.getRuntime().availableProcessors()
         println("Available processors: ${Runtime.getRuntime().availableProcessors()}")
 
@@ -46,7 +46,6 @@ class RayTracer(
                                     if (p > 0) ((p + r.nextDouble()) / level) else p.toDouble()
                                 val yJitter =
                                     if (q > 0) (q + r.nextDouble()) / level else q.toDouble()
-
 
                                 val jitteredX = (x + xJitter).toFloat()
                                 val jitteredY = (y + yJitter).toFloat()
@@ -75,9 +74,8 @@ class RayTracer(
 //                println("Completed chunk of size ${chunk.size} in time  ${Clock.System.now() - currentInstant}.")
             }
 
-        val duration = Clock.System.now() - currentInstant
-        println("Done drawing pixels. Took: $duration")
-
+//        val duration = Clock.System.now() - currentInstant
+//        println("Done drawing pixels. Took: $duration")
 
     }
 

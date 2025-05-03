@@ -34,7 +34,7 @@ data class Color(val r: Float, val g: Float, val b: Float) {
         @Suppress("unused")
         fun allColors(): List<Color> {
             return Companion::class.members
-                .filter { it.returnType == net.fredrikmeyer.Color::class }
+                .filter { it.returnType.toString() == "net.fredrikmeyer.Color" }
                 .mapNotNull { member ->
                     try {
                         member.call(this) as? Color
