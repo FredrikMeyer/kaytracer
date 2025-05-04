@@ -3,6 +3,7 @@ package net.fredrikmeyer.geometry
 import net.fredrikmeyer.Interval
 import net.fredrikmeyer.Ray
 import net.fredrikmeyer.linalg.Matrix3x3
+import kotlin.math.absoluteValue
 
 class Triangle(val a: Point3D, val b: Point3D, val c: Point3D) : GeometricObject {
     private val ab = a.toVector3D() - b.toVector3D()
@@ -47,7 +48,7 @@ class Triangle(val a: Point3D, val b: Point3D, val c: Point3D) : GeometricObject
     override fun isOnObject(point: Point3D): Boolean {
         // First, check if the point is on the plane of the triangle
         val pointToA = point.toVector3D() - a.toVector3D()
-        if (abs(pointToA dot normal) > 0.000001f) {
+        if ((pointToA dot normal).absoluteValue > 0.000001f) {
             return false // Point is not on the plane
         }
 
@@ -59,7 +60,7 @@ class Triangle(val a: Point3D, val b: Point3D, val c: Point3D) : GeometricObject
         val pb = b.toVector3D() - point.toVector3D()
         val pc = c.toVector3D() - point.toVector3D()
 
-        // Compute cross products
+        // Compute the cross products
         val crossPbPc = pb cross pc
         val crossPcPa = pc cross pa
         val crossPaPb = pa cross pb
@@ -73,8 +74,6 @@ class Triangle(val a: Point3D, val b: Point3D, val c: Point3D) : GeometricObject
         return (signPbPc >= 0 && signPcPa >= 0 && signPaPb >= 0) ||
                 (signPbPc <= 0 && signPcPa <= 0 && signPaPb <= 0)
     }
-
-    private fun abs(value: Float): Float = if (value < 0) -value else value
 
     override fun normalAtPoint(point: Point3D): Vector3D {
         return normal

@@ -22,4 +22,8 @@ class Camera(var seeFrom: Point3D, val lookAt: Point3D) {
             direction = (d * dir + (u * uu + v * vv)).normalize()
         )
     }
+
+    override fun toString(): String {
+        return "Camera(lookAt=$lookAt, seeFrom=$seeFrom)"
+    }
 }

@@ -13,11 +13,11 @@ val config = RayTracerConfig(
     maxRecursionDepth = 30
 )
 
-class State(
+data class State(
     var currentCameraZ: Float = 3.0f,
     var rotationAngle: Double = Math.PI / 2.0,
-    var paused: Boolean = false,
-    var needsRerender: Boolean = false
+    var paused: Boolean = true,
+    var needsRerender: Boolean = true
 )
 
 @Suppress("unused")
@@ -40,14 +40,14 @@ object Scenes {
         }
     }
     val spheres = scene {
-        ambientLightIntensity = 0.2f
+        ambientLightIntensity = 0.5f
         lightSource {
-            position = Point3D(0.5f, 6f, 0f)
+            position = Point3D(-0.5f, 3.5f, 0.5f)
             intensity = 100f
         }
         lightSource {
-            position = Point3D(-0.5f, 6f, 0.5f)
-            intensity = 10f
+            position = Point3D(-1.5f, 3.5f, 0.5f)
+            intensity = 100f
         }
         surface {
             sphere {
@@ -56,7 +56,8 @@ object Scenes {
             }
             material {
                 color = Color.RED
-                reflectivity = 0.0f
+                reflectivity = 0.2f
+                phongCoefficient = 1000.0
                 specularCoefficient = Color.WHITE
             }
         }
@@ -128,24 +129,13 @@ object Scenes {
             position(1.5f, 0.5f, 0.5f)
             intensity = 1000f
         }
-//        surface {
-//            plane {
-//                point = Point3D(0.0f, -1f, 0.0f)
-//                normal = Vector3D(0f, 1f, 0.0f)
-//            }
-//            material {
-//                color = Color.WHITE
-//                reflectivity = 0.5f
-//            }
-//        }
         surface {
-            sphere {
-                radius = 0.25f
-                center(-0.7f, 0.9f, 0.0f)
-            }
+            sphere { radius = 0.1f; center = Point3D(0.0f, 0.0f, 0.0f) }
             material {
                 color = Color.RED
-                reflectivity = 0.6f
+                reflectivity = 0.5f
+                phongCoefficient = 100.0
+                specularCoefficient = Color.WHITE
             }
         }
         surface {
@@ -179,44 +169,154 @@ object Scenes {
 
 
     val cornellBox = scene {
-        surface {
-            cube {
-                p1 = Point3D(-1f, -1f, -1f)
-                p2 = Point3D(1f, 1f, 1f)
-            }
-            material {
-                color = Color.WHITE
-                reflectivity = 0.0f
-            }
+        ambientLightIntensity = 0.1f
+        lightSource {
+            position = Point3D(0f, 0.0f, 3f)
+            intensity = 100f
         }
         surface {
-            plane {
-                point = Point3D(0.0f, 0.0f, -3.0f)
-                normal = Vector3D(0.0f, 1.0f, 0.0f)
+            val r1 =  0.45f
+            sphere {
+                radius = r1
+                center = Point3D(-0.3f, -1 + r1, 0.2f)
             }
             material {
                 color = Color.RED
-                reflectivity = 0.0f
+                reflectivity = 0.5f
+                phongCoefficient = 100.0
+                specularCoefficient = Color.WHITE
             }
         }
+        val r = 0.1f
         surface {
-            plane {
-                point = Point3D(-3f, 0.0f, 0.0f)
-                normal = Vector3D(1f, 0.0f, 0.0f)
-            }
-            material {
-                color = Color.GREEN
-                reflectivity = 0.0f
-            }
-        }
-        surface {
-            plane {
-                point = Point3D(3f, 0.0f, 0.0f)
-                normal = Vector3D(-1f, 0.0f, 0.0f)
+            sphere {
+                radius = r
+                center = Point3D(0.5f, -1 + r, 0.5f)
             }
             material {
                 color = Color.BLUE
-                reflectivity = 0.0f
+                reflectivity = 0.5f
+                specularCoefficient = Color.WHITE
+            }
+        }
+        val r2 = 0.15f
+        surface {
+            sphere {
+                radius = r2
+                center = Point3D(0.2f, -1f + r2, 0.7f)
+            }
+            material {
+                color = Color.YELLOW
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(-1f, -1f, -1f)
+                p3 = Point3D(1f, -1f, -1f)
+                p2 = Point3D(-1f, 1f, -1f)
+            }
+            material {
+                color = Color.WHITE
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(1f, -1f, -1f)
+                p3 = Point3D(1f, 1f, -1f)
+                p2 = Point3D(-1f, 1f, -1f)
+            }
+            material {
+                color = Color.WHITE
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(-1f, -1f, -1f)
+                p2 = Point3D(-1f, 1f, -1f)
+                p3 = Point3D(-1f, -1f, 1f)
+            }
+            material {
+                color = Color.GREEN
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(-1f, 1f, -1f)
+                p2 = Point3D(-1f, 1f, 1f)
+                p3 = Point3D(-1f, -1f, 1f)
+            }
+            material {
+                color = Color.GREEN
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(1f, -1f, -1f)
+                p2 = Point3D(1f, -1f, 1f)
+                p3 = Point3D(1f, 1f, -1f)
+            }
+            material {
+                color = Color.RED
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(1f, 1f, -1f)
+                p2 = Point3D(1f, -1f, 1f)
+                p3 = Point3D(1f, 1f, 1f)
+            }
+            material {
+                color = Color.RED
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(-1f, -1f, -1f)
+                p2 = Point3D(1f, -1f, -1f)
+                p3 = Point3D(1f, -1f, 1f)
+            }
+            material {
+                color = Color.GRAY_LIGHT
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(-1f, -1f, -1f)
+                p2 = Point3D(1f, -1f, 1f)
+                p3 = Point3D(-1f, -1f, 1f)
+            }
+            material {
+                color = Color.GRAY_LIGHT
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(-1f, 1f, -1f)
+                p2 = Point3D(1f, 1f, -1f)
+                p3 = Point3D(1f, 1f, 1f)
+            }
+            material {
+                color = Color.GRAY_LIGHT
+                reflectivity = 0.1f
+            }
+        }
+        surface {
+            triangle {
+                p1 = Point3D(-1f, 1f, -1f)
+                p2 = Point3D(1f, 1f, 1f)
+                p3 = Point3D(-1f, 1f, 1f)
+            }
+            material {
+                color = Color.GRAY_LIGHT
+                reflectivity = 0.1f
             }
         }
     }
@@ -224,7 +324,7 @@ object Scenes {
 
 fun main() {
     println("Available processors: ${Runtime.getRuntime().availableProcessors()}")
-    val scene = Scenes.spheres
+    val scene = Scenes.cornellBox
     println(scene)
 
     // Create a bitmap with a simple pattern
@@ -283,22 +383,24 @@ fun main() {
         val angle = state.rotationAngle
 
         if (elapsedTime >= targetFrameTime) {
-            val lightPos = Point3D(1.5f * cos(angle).toFloat(), 3f, 1.5f * sin(angle).toFloat())
-            scene.updateLightPosition(lightPos)
+//            val lightPos = Point3D(1.5f * cos(angle).toFloat(), 3f, 1.5f * sin(angle).toFloat())
+//            scene.updateLightPosition(lightPos)
             camera.seeFrom = Point3D(
-                x = 0.5 + state.currentCameraZ * cos(angle),
+                x = state.currentCameraZ * cos(angle),
                 z = state.currentCameraZ * sin(angle),
                 y = 0.0
             )
             if (!state.paused || state.needsRerender) {
-                rayTracer.doRayTracing({
+                rayTracer.doRayTracing {
                     bbs.setPixels(it)
                     viewer.refresh()
-                })
+                }
                 if (!state.paused) {
                     state.rotationAngle += 0.05
                 }
                 state.needsRerender = false
+                println(state)
+                println(camera)
             }
             viewer.refresh()
             lastFrameTime = currentTime

@@ -5,9 +5,8 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.pow
-import kotlin.time.Clock
 
-import kotlin.time.ExperimentalTime
+//import kotlin.time.Clock
 
 data class RayTracerConfig(
     val width: Int = 700,
@@ -16,7 +15,7 @@ data class RayTracerConfig(
     val antiAliasMaxLevel: Int = 3,
 )
 
-@OptIn(ExperimentalTime::class)
+//@OptIn(ExperimentalTime::class)
 class RayTracer(
     private val scene: Scene,
     private val config: RayTracerConfig,
@@ -26,13 +25,12 @@ class RayTracer(
     private val height = config.height
 
     fun doRayTracing(setPixelsCallback: (Map<Pair<Int, Int>, Color>) -> Unit) {
-        val currentInstant = Clock.System.now()
+//        val currentInstant = Clock.System.now()
         val chunkLength = width / Runtime.getRuntime().availableProcessors()
 
 
         (0..<width).chunked(chunkLength)
             .parallelStream().forEach { chunk ->
-//                println("Processing chunk of size ${chunk.size} at ${Clock.System.now() - currentInstant}")
                 val pixels = Array(height) { Array(width) { Color.BLACK } }
 
                 val r = ThreadLocalRandom.current()
@@ -71,11 +69,10 @@ class RayTracer(
                     }
                 }
                 setPixelsCallback(m)
-//                println("Completed chunk of size ${chunk.size} in time  ${Clock.System.now() - currentInstant}.")
             }
 
-        val duration = Clock.System.now() - currentInstant
-        println("Done drawing pixels. Took: $duration")
+//        val duration = Clock.System.now() - currentInstant
+//        println("Done drawing pixels. Took: $duration")
 
     }
 
@@ -113,7 +110,7 @@ class RayTracer(
             val rayFromHitToLight = Ray(hitPoint, lightDir)
 
             // Compute if the ray from the hit point to the light source intersects with any object
-            color = color + if (!isInShadow(rayFromHitToLight, distanceToLight)) {
+            color = color + if (!isInShadow(rayFromHitToLight, distanceToLight, normal)) {
                 // Scale intensity with inverse square law
                 val I = (lightSource.intensity / (4 * PI * distanceToLight)).toFloat()
                 val kd = materialColor
@@ -139,19 +136,23 @@ class RayTracer(
 
         val directContribution = (1 - reflectivity) * color
         return if (reflectivity > 0 || recursionDepth < config.maxRecursionDepth) {
-            val acc = directContribution +
-                    (reflectivity * colorOfRay(
-                        newRay,
-                        interval = Interval(0.0001f, Float.POSITIVE_INFINITY),
-                        recursionDepth + 1
-                    ))
-            acc
+            val reflectedColor = reflectivity * colorOfRay(
+                newRay,
+                interval = Interval(0.0001f, Float.POSITIVE_INFINITY),
+                recursionDepth + 1
+            )
+//            val tintedReflection = 0.5f * reflectedColor + (0.5f * reflectedColor) * material.color
+            directContribution + reflectedColor
         } else {
             directContribution
         }
     }
 
-    private fun isInShadow(ray: Ray, distanceToLight: Float): Boolean {
+    private fun isInShadow(ray: Ray, distanceToLight: Float, normal: Vector3D): Boolean {
+//        val lightDir = ray.direction.normalize()
+//        if (normal dot lightDir < 0) {
+//            return false
+//        }
         // TODO: doesn't need a Hit object, only true/false
         return scene.hit(ray, Interval(0.0001f, distanceToLight)) != null
     }

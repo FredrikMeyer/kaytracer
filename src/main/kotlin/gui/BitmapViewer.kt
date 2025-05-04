@@ -114,7 +114,7 @@ class BitmapViewer(
         val rotationSlider = DistanceSlider(
             min = 0,
             max = (200 * Math.PI).roundToInt(),
-            initial = 0,
+            initial = (state.rotationAngle * 100.0f).roundToInt(),
             scale = 100.0
         )
 
@@ -221,6 +221,15 @@ class BitmapViewer(
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher { e ->
             if (e.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_ESCAPE) {
                 close()
+                true // Event handled
+            } else if (e.id == KeyEvent.KEY_PRESSED && e.keyCode == KeyEvent.VK_SPACE) {
+                if (pauseButton.text == "Pause") {
+                    pauseButton.text = "Resume"
+                    state.paused = true
+                } else {
+                    pauseButton.text = "Pause"
+                    state.paused = false
+                }
                 true // Event handled
             } else {
                 false // Event not handled
