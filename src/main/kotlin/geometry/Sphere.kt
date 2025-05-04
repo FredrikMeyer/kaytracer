@@ -20,6 +20,16 @@ data class Sphere(val center: Point3D, val radius: Float) : GeometricObject {
         return abs((point.toVector3D() - center.toVector3D()).norm() - radius) < 0.000001
     }
 
+    fun intersect(other: Sphere): Float? {
+        val dirToSphere = center.toVector3D() - other.center.toVector3D()
+        val radiusSum = radius + other.radius
+        return if (dirToSphere.normSquared() <= radiusSum.squared()) {
+            0f
+        } else {
+            null
+        }
+    }
+
     private fun intersectRaySphere(ray: Ray, sphere: Sphere): Float? {
         val dirToSphere = ray.origin.toVector3D() - sphere.center.toVector3D()
         val direction = ray.direction

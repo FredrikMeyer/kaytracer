@@ -11,15 +11,17 @@ data class Color(val r: Float, val g: Float, val b: Float) {
     }
 
     fun toJavaAwt(): AwtColor {
-        val (r,g,b) = this.clamp()
+        val (r, g, b) = this.clamp()
         return AwtColor(r.gammaEncode(), g.gammaEncode(), b.gammaEncode())
     }
+
     infix operator fun plus(other: Color) =
         Color(this.r + other.r, this.g + other.g, this.b + other.b)
 
     infix operator fun times(other: Color) =
         Color(this.r * other.r, this.g * other.g, this.b * other.b)
 
+    @Suppress("unused")
     companion object {
         val WHITE = Color(1.0f, 1.0f, 1.0f)
         val GRAY_LIGHT = Color(0.8f, 0.8f, 0.8f)
@@ -31,7 +33,6 @@ data class Color(val r: Float, val g: Float, val b: Float) {
         val MAGENTA = Color(1.0f, 0.0f, 1.0f)
         val BLACK = Color(0.0f, 0.0f, 0.0f)
 
-        @Suppress("unused")
         fun allColors(): List<Color> {
             return Companion::class.members
                 .filter { it.returnType.toString() == "net.fredrikmeyer.Color" }
