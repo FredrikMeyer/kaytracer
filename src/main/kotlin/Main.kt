@@ -13,7 +13,7 @@ val config = RayTracerConfig(
     maxRecursionDepth = 30
 )
 
-class State(var currentCameraZ: Float = 3.0f)
+class State(var currentCameraZ: Float = 3.0f, var rotationAngle: Double = Math.PI / 2.0)
 
 object Scenes {
     val simple = scene {
@@ -230,6 +230,10 @@ fun main() {
         cameraPositionChangeListener = { newCameraZ ->
             state.currentCameraZ = newCameraZ
             this.refresh()
+        },
+        rotationChangeListener = { newRotationAngle ->
+            state.rotationAngle = newRotationAngle
+            this.refresh()
         }
     )
 
@@ -241,7 +245,6 @@ fun main() {
         Thread.sleep(10)
     }
 
-    var angle = Math.PI / 2
     var lastFrameTime = System.currentTimeMillis()
 
     val camera = Camera(
@@ -260,6 +263,8 @@ fun main() {
         val currentTime = System.currentTimeMillis()
         val elapsedTime = currentTime - lastFrameTime
 
+        val angle = state.rotationAngle
+
         if (elapsedTime >= targetFrameTime) {
             val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
             scene.updateLightPosition(lightPos)
@@ -274,7 +279,7 @@ fun main() {
             })
             viewer.refresh()
             lastFrameTime = currentTime
-            angle += 0.05
+//            state.rotationAngle += 0.05
         } else {
             // Short sleep to avoid busy-waiting
             Thread.sleep(10)
