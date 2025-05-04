@@ -7,14 +7,20 @@ import kotlin.math.sin
 
 
 val config = RayTracerConfig(
-    width = 500,
-    height = 500,
+    width = 700,
+    height = 700,
     antiAliasMaxLevel = 2,
     maxRecursionDepth = 30
 )
 
-class State(var currentCameraZ: Float = 3.0f, var rotationAngle: Double = Math.PI / 2.0)
+class State(
+    var currentCameraZ: Float = 3.0f,
+    var rotationAngle: Double = Math.PI / 2.0,
+    var paused: Boolean = false,
+    var needsRerender: Boolean = false
+)
 
+@Suppress("unused")
 object Scenes {
     val simple = scene {
         ambientLightIntensity = 0.1f
@@ -36,12 +42,12 @@ object Scenes {
     val spheres = scene {
         ambientLightIntensity = 0.2f
         lightSource {
-            position = Point3D(0.5f, 3f, 0f)
-            intensity = 1000f
+            position = Point3D(0.5f, 6f, 0f)
+            intensity = 100f
         }
         lightSource {
-            position = Point3D(2.5f, 3f, 0f)
-            intensity = 1000f
+            position = Point3D(-0.5f, 6f, 0.5f)
+            intensity = 10f
         }
         surface {
             sphere {
@@ -97,10 +103,14 @@ object Scenes {
         }
         // Bottom plane
         surface {
-            geometry = Plane(point = Point3D(0.0f, -1f, 0f), normal = Vector3D(0f, 1f, 0.0f))
+            plane {
+                point = Point3D(0.0f, -1f, 0f)
+                normal = Vector3D(0f, 1f, 0.0f)
+            }
             material {
                 color = Color.GREEN
-                reflectivity = 0.3f
+                reflectivity = 0.5f
+                phongCoefficient = 100.0
             }
         }
     }
@@ -213,6 +223,7 @@ object Scenes {
 }
 
 fun main() {
+    println("Available processors: ${Runtime.getRuntime().availableProcessors()}")
     val scene = Scenes.spheres
     println(scene)
 
@@ -229,10 +240,16 @@ fun main() {
         state = state,
         cameraPositionChangeListener = { newCameraZ ->
             state.currentCameraZ = newCameraZ
+            if (state.paused) {
+                state.needsRerender = true
+            }
             this.refresh()
         },
         rotationChangeListener = { newRotationAngle ->
             state.rotationAngle = newRotationAngle
+            if (state.paused) {
+                state.needsRerender = true
+            }
             this.refresh()
         }
     )
@@ -266,20 +283,25 @@ fun main() {
         val angle = state.rotationAngle
 
         if (elapsedTime >= targetFrameTime) {
-            val lightPos = Point3D(1.5f * cos(angle).toFloat(), 1.5f, 1.5f * sin(angle).toFloat())
+            val lightPos = Point3D(1.5f * cos(angle).toFloat(), 3f, 1.5f * sin(angle).toFloat())
             scene.updateLightPosition(lightPos)
             camera.seeFrom = Point3D(
                 x = 0.5 + state.currentCameraZ * cos(angle),
                 z = state.currentCameraZ * sin(angle),
                 y = 0.0
             )
-            rayTracer.doRayTracing({
-                bbs.setPixels(it)
-                viewer.refresh()
-            })
+            if (!state.paused || state.needsRerender) {
+                rayTracer.doRayTracing({
+                    bbs.setPixels(it)
+                    viewer.refresh()
+                })
+                if (!state.paused) {
+                    state.rotationAngle += 0.05
+                }
+                state.needsRerender = false
+            }
             viewer.refresh()
             lastFrameTime = currentTime
-//            state.rotationAngle += 0.05
         } else {
             // Short sleep to avoid busy-waiting
             Thread.sleep(10)
@@ -290,5 +312,3 @@ fun main() {
     println("Window closed, exiting program")
     viewer.close()
 }
-
-

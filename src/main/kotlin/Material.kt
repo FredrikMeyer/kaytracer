@@ -7,6 +7,9 @@ data class Material(
     val reflectivity: Float = 0.3f
 )
 
+interface Material2 {
+}
+
 /*
 // Different types of interactions a ray can have with a material
 sealed class MaterialInteraction {

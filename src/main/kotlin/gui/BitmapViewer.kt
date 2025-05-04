@@ -82,6 +82,17 @@ class BitmapViewer(
                 }
             }
         })
+        // Add a border to the panel with appropriate padding
+        panel.border =
+            BorderFactory.createCompoundBorder(
+                EmptyBorder(10, 10, 10, 10),
+                TitledBorder(
+                    EtchedBorder(),
+                    "Image",
+                    TitledBorder.LEFT,
+                    TitledBorder.TOP
+                )
+            )
 
 
         val distanceSliderValueLabel = JLabel("Camera Z: ${state.currentCameraZ}")
@@ -148,23 +159,38 @@ class BitmapViewer(
 //        frame.preferredSize = Dimension(700, 900)
         frame.layout = BorderLayout()
 
+        val pauseButtonPanel = JPanel(FlowLayout(FlowLayout.LEFT))
+        val pauseButton = JButton("Pause")
+        pauseButton.preferredSize = Dimension(100, 20)
+        pauseButton.addActionListener {
+            if (pauseButton.text == "Pause") {
+                pauseButton.text = "Resume"
+                state.paused = true
+            } else {
+                pauseButton.text = "Pause"
+                state.paused = false
+            }
+        }
+        pauseButtonPanel.add(pauseButton)
+        pauseButtonPanel.border =
+            BorderFactory.createCompoundBorder(
+                EmptyBorder(10, 10, 10, 10),
+                TitledBorder(
+                    EtchedBorder(),
+                    "Buttons",
+                    TitledBorder.LEFT,
+                    TitledBorder.TOP
+                )
+            )
+
+
         // Wrap the panel in a container that respects its maximum size
         val wrapperPanel = JPanel()
         wrapperPanel.layout = BoxLayout(wrapperPanel, BoxLayout.X_AXIS)
         wrapperPanel.add(Box.createHorizontalGlue())
         wrapperPanel.add(panel)
+        wrapperPanel.add(pauseButtonPanel)
         wrapperPanel.add(Box.createHorizontalGlue())
-        // Add a border to the panel with appropriate padding
-        panel.border =
-            BorderFactory.createCompoundBorder(
-                EmptyBorder(10, 10, 10, 10),
-                TitledBorder(
-                    EtchedBorder(),
-                    "Image",
-                    TitledBorder.LEFT,
-                    TitledBorder.TOP
-                )
-            )
 
         frame.add(wrapperPanel, BorderLayout.CENTER)
         frame.add(controlPanel, BorderLayout.SOUTH)

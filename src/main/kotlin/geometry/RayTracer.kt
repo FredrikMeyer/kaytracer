@@ -6,16 +6,17 @@ import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.time.Clock
-//import kotlin.time.ExperimentalTime
+
+import kotlin.time.ExperimentalTime
 
 data class RayTracerConfig(
     val width: Int = 700,
     val height: Int = 700,
     val maxRecursionDepth: Int = 3,
-    val antiAliasMaxLevel: Int = 3
+    val antiAliasMaxLevel: Int = 3,
 )
 
-//@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class)
 class RayTracer(
     private val scene: Scene,
     private val config: RayTracerConfig,
@@ -25,12 +26,11 @@ class RayTracer(
     private val height = config.height
 
     fun doRayTracing(setPixelsCallback: (Map<Pair<Int, Int>, Color>) -> Unit) {
-//        val currentInstant = Clock.System.now()
+        val currentInstant = Clock.System.now()
         val chunkLength = width / Runtime.getRuntime().availableProcessors()
-        println("Available processors: ${Runtime.getRuntime().availableProcessors()}")
 
 
-        val jobs = (0..<width).chunked(chunkLength)
+        (0..<width).chunked(chunkLength)
             .parallelStream().forEach { chunk ->
 //                println("Processing chunk of size ${chunk.size} at ${Clock.System.now() - currentInstant}")
                 val pixels = Array(height) { Array(width) { Color.BLACK } }
@@ -74,24 +74,19 @@ class RayTracer(
 //                println("Completed chunk of size ${chunk.size} in time  ${Clock.System.now() - currentInstant}.")
             }
 
-//        val duration = Clock.System.now() - currentInstant
-//        println("Done drawing pixels. Took: $duration")
+        val duration = Clock.System.now() - currentInstant
+        println("Done drawing pixels. Took: $duration")
 
     }
 
-    private tailrec fun colorOfRay(
+    private fun colorOfRay(
         ray: Ray,
-        accumulatedColor: Color = Color.BLACK,
         interval: Interval = Interval(0f, Float.POSITIVE_INFINITY),
         recursionDepth: Int = 0,
     ): Color {
-        if (recursionDepth >= config.maxRecursionDepth) {
-            return accumulatedColor
-        }
-
         val hit = scene.hit(ray, interval = interval)
         if (hit == null) {
-            return accumulatedColor
+            return Color.BLACK
         }
 
         val hitPoint = hit.point
@@ -100,8 +95,11 @@ class RayTracer(
         // TODO: vil ikke ambient light bli lagt til altfor mange ganger her?
         // Ambient light
         // k_a
+        var color = Color.BLACK
         val materialColor = material.color
-        var color = scene.ambientLightIntensity * materialColor
+        color = if (recursionDepth == 0) scene.ambientLightIntensity * materialColor else {
+            color
+        }
 
         val normal = hit.surface.geometry.normalAtPoint(hitPoint)
         val lightSources = scene.getLightSources()
@@ -111,11 +109,11 @@ class RayTracer(
             val lightDirectionVector = lightPos.toVector3D() - hitPoint.toVector3D()
             val lightDir = lightDirectionVector
 
-            val rayFromHitToLight = Ray(hitPoint,  lightDir)
+            val distanceToLight = lightDirectionVector.normSquared()
+            val rayFromHitToLight = Ray(hitPoint, lightDir)
 
             // Compute if the ray from the hit point to the light source intersects with any object
-            color = color + if (!isInShadow(rayFromHitToLight)) {
-                val distanceToLight = lightDirectionVector.normSquared()
+            color = color + if (!isInShadow(rayFromHitToLight, distanceToLight)) {
                 // Scale intensity with inverse square law
                 val I = (lightSource.intensity / (4 * PI * distanceToLight)).toFloat()
                 val kd = materialColor
@@ -139,18 +137,23 @@ class RayTracer(
         val newRay = Ray(hitPoint, reflectionVector)
         val reflectivity = material.reflectivity
 
-        val acc = accumulatedColor + (1 - reflectivity) * color
-        return colorOfRay(
-            newRay,
-            accumulatedColor = acc,
-            interval = Interval(0.0001f, Float.POSITIVE_INFINITY),
-            recursionDepth + 1
-        )
+        val directContribution = (1 - reflectivity) * color
+        return if (reflectivity > 0 || recursionDepth < config.maxRecursionDepth) {
+            val acc = directContribution +
+                    (reflectivity * colorOfRay(
+                        newRay,
+                        interval = Interval(0.0001f, Float.POSITIVE_INFINITY),
+                        recursionDepth + 1
+                    ))
+            acc
+        } else {
+            directContribution
+        }
     }
 
-    private fun isInShadow(ray: Ray): Boolean {
+    private fun isInShadow(ray: Ray, distanceToLight: Float): Boolean {
         // TODO: doesn't need a Hit object, only true/false
-        return scene.hit(ray, Interval(0.0001f, Float.POSITIVE_INFINITY)) != null
+        return scene.hit(ray, Interval(0.0001f, distanceToLight)) != null
     }
 
     private fun createReflectionVector(ray: Ray, normal: Vector3D): Vector3D {
