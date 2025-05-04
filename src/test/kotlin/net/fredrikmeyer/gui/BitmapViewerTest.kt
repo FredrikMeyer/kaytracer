@@ -62,8 +62,8 @@ class BitmapViewerTest {
 
     @Test
     fun `test camera position slider initialization`() {
-        // Find the slider in the frame
-        val slider = window.slider()
+        // Find the slider in the frame by name
+        val slider = window.slider("cameraZSlider")
 
         // Verify the slider exists
         slider.requireVisible()

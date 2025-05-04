@@ -2,18 +2,16 @@ package net.fredrikmeyer.gui
 
 import net.fredrikmeyer.BasicBitmapStorage
 import net.fredrikmeyer.State
-import net.fredrikmeyer.geometry.scene
-import java.awt.BorderLayout
-import java.awt.Dimension
-import java.awt.FlowLayout
-import java.awt.Graphics
-import java.awt.KeyboardFocusManager
+import java.awt.*
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
-import java.util.Hashtable
+import java.util.*
 import javax.swing.*
-import javax.swing.event.ChangeEvent
+import javax.swing.border.EmptyBorder
+import javax.swing.border.EtchedBorder
+import javax.swing.border.TitledBorder
 import kotlin.math.roundToInt
+
 
 /**
  * A class for displaying the bitmap stored in BasicBitmapStorage.
@@ -54,11 +52,23 @@ class BitmapViewer(
         val panel = object : JPanel() {
             override fun paintComponent(g: Graphics) {
                 super.paintComponent(g)
-                g.drawImage(bitmapStorage.image, 0, 0, this)
+                // Get the insets of the border to position the image correctly
+                val insets = border?.getBorderInsets(this) ?: Insets(0, 0, 0, 0)
+                g.drawImage(bitmapStorage.image, insets.left, insets.top, this)
             }
 
             override fun getPreferredSize(): Dimension {
-                return Dimension(bitmapStorage.image.width, bitmapStorage.image.height)
+                // Get the insets of the border to add to the preferred size
+                val insets = border?.getBorderInsets(this) ?: Insets(0, 0, 0, 0)
+                return Dimension(
+                    bitmapStorage.image.width + insets.left + insets.right,
+                    bitmapStorage.image.height + insets.top + insets.bottom
+                )
+            }
+
+            // Prevent the panel from expanding by making maximum size same as preferred size
+            override fun getMaximumSize(): Dimension {
+                return preferredSize
             }
         }
 
@@ -82,6 +92,7 @@ class BitmapViewer(
             (state.currentCameraZ * 10).toInt(),
             scale = 10.0
         )
+        distanceSlider.name = "cameraZSlider"
         distanceSlider.addChangeListener { e ->
             val value = (distanceSlider.value / 10.0f)
             distanceSliderValueLabel.text = "Camera Z: $value"
@@ -107,6 +118,16 @@ class BitmapViewer(
         // Create the control panel
         val controlPanel = JPanel()
         controlPanel.layout = BoxLayout(controlPanel, BoxLayout.Y_AXIS)
+        controlPanel.border =
+            BorderFactory.createCompoundBorder(
+                EmptyBorder(10, 10, 10, 10),
+                TitledBorder(
+                    EtchedBorder(),
+                    "Controls",
+                    TitledBorder.LEFT,
+                    TitledBorder.TOP
+                )
+            )
 
         val distancePanel = JPanel(FlowLayout(FlowLayout.LEFT))
         distancePanel.add(JLabel("Camera Distance:").apply {
@@ -124,11 +145,31 @@ class BitmapViewer(
 
         // Set up the frame with BorderLayout
         frame.defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
+//        frame.preferredSize = Dimension(700, 900)
         frame.layout = BorderLayout()
-        frame.add(panel, BorderLayout.CENTER)
+
+        // Wrap the panel in a container that respects its maximum size
+        val wrapperPanel = JPanel()
+        wrapperPanel.layout = BoxLayout(wrapperPanel, BoxLayout.X_AXIS)
+        wrapperPanel.add(Box.createHorizontalGlue())
+        wrapperPanel.add(panel)
+        wrapperPanel.add(Box.createHorizontalGlue())
+        // Add a border to the panel with appropriate padding
+        panel.border =
+            BorderFactory.createCompoundBorder(
+                EmptyBorder(10, 10, 10, 10),
+                TitledBorder(
+                    EtchedBorder(),
+                    "Image",
+                    TitledBorder.LEFT,
+                    TitledBorder.TOP
+                )
+            )
+
+        frame.add(wrapperPanel, BorderLayout.CENTER)
         frame.add(controlPanel, BorderLayout.SOUTH)
         frame.pack()
-        frame.isResizable = false
+        frame.isResizable = true
         frame.isFocusable = true
 
         // Add key listener to close the frame when ESC is pressed
