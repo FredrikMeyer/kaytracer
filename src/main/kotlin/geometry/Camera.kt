@@ -7,7 +7,7 @@ class Camera(var seeFrom: Point3D, val lookAt: Point3D) {
         val (u, v) = uv
 
         val up = Vector3D(0f, 1f, 0f)
-        val dir = (seeFrom.toVector3D() - lookAt.toVector3D()).normalize()
+        val dir = (lookAt.toVector3D() - seeFrom.toVector3D()).normalize()
 
         val uu = -1f * (up cross dir)
 
@@ -19,7 +19,7 @@ class Camera(var seeFrom: Point3D, val lookAt: Point3D) {
         val d = 1f
         return Ray(
             origin = e,
-            direction = (-d * dir + (u * uu + v * vv)).normalize()
+            direction = (d * dir + (u * uu + v * vv)).normalize()
         )
     }
 }
