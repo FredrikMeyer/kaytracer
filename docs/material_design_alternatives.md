@@ -58,6 +58,8 @@ class DielectricMaterial(val refractiveIndex: Float) : Material {
 }
 ```
 
+> **Note**: A sealed interface could be used instead of a regular interface to gain additional benefits like exhaustive pattern matching and compiler optimizations. This approach is detailed in [Alternative 2: Sealed Interface Approach](#alternative-2-sealed-interface-approach).
+
 ### Pros
 - Highly flexible and extensible
 - Each material type can have its own properties
