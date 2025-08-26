@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package net.fredrikmeyer.geometry
 
 import net.fredrikmeyer.*
@@ -5,8 +7,8 @@ import java.util.concurrent.ThreadLocalRandom
 import kotlin.math.PI
 import kotlin.math.max
 import kotlin.math.pow
-
-//import kotlin.time.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 data class RayTracerConfig(
     val width: Int = 700,
@@ -25,7 +27,7 @@ class RayTracer(
     private val height = config.height
 
     fun doRayTracing(setPixelsCallback: (Map<Pair<Int, Int>, Color>) -> Unit) {
-//        val currentInstant = Clock.System.now()
+        val currentInstant = Clock.System.now()
         val chunkLength = width / Runtime.getRuntime().availableProcessors()
 
 
@@ -71,8 +73,8 @@ class RayTracer(
                 setPixelsCallback(m)
             }
 
-//        val duration = Clock.System.now() - currentInstant
-//        println("Done drawing pixels. Took: $duration")
+        val duration = Clock.System.now() - currentInstant
+        println("Done drawing pixels. Took: $duration")
 
     }
 
