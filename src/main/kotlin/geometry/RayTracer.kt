@@ -83,10 +83,7 @@ class RayTracer(
         interval: Interval = Interval(0f, Float.POSITIVE_INFINITY),
         recursionDepth: Int = 0,
     ): Color {
-        val hit = scene.hit(ray, interval = interval)
-        if (hit == null) {
-            return Color.BLACK
-        }
+        val hit = scene.hit(ray, interval = interval) ?: return Color.BLACK
 
         val hitPoint = hit.point
         val material = hit.surface.material
