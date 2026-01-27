@@ -22,7 +22,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:6.0.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.assertj:assertj-core:3.27.6")
+    testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation("org.assertj:assertj-swing-junit:3.17.1")
     constraints {
         testImplementation("junit:junit:4.13.2")
